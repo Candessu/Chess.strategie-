@@ -10,21 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Installer Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Installer le SDK Android
-        uses: android-actions/setup-android@v3
-
-      - name: Installer Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
+      - name: Préparer le SDK Android et Gradle
+        run: |
+          echo "SDK : $ANDROID_HOME"
+          SDKM=$(ls $ANDROID_HOME/cmdline-tools/*/bin/sdkmanager | head -n 1)
+          yes | $SDKM --licenses > /dev/null || true
+          $SDKM "platforms;android-34" "build-tools;34.0.0" > /dev/null
+          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q gradle-8.7-bin.zip -d $HOME/gradle
+          echo "$HOME/gradle/gradle-8.7/bin" >> $GITHUB_PATH
 
       - name: Créer le projet Android
         run: |
+          set -e
           mkdir -p app/src/main/java/com/echecs/strategie app/src/main/assets app/src/main/res/drawable app/src/main/res/drawable-anydpi-v26
           cat > settings.gradle << 'EOF_0'
           pluginManagement {
@@ -56,8 +59,8 @@ jobs:
                   applicationId 'com.echecs.strategie'
                   minSdk 21
                   targetSdk 34
-                  versionCode 3
-                  versionName '3.0'
+                  versionCode 5
+                  versionName '3.2'
               }
               buildTypes {
                   release { minifyEnabled false }
@@ -217,19 +220,30 @@ jobs:
           EOF_5
           cat > app/src/main/res/drawable/ic_launcher.xml << 'EOF_6'
           <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-              <path android:fillColor="#2C5A41" android:pathData="M24,6h60a18,18 0 0 1 18,18v60a18,18 0 0 1 -18,18h-60a18,18 0 0 1 -18,-18v-60a18,18 0 0 1 18,-18z"/>
-              <path android:fillColor="#E8B84A" android:pathData="M54,28a9,9 0 1,1 -0.01,0z M45,47h18v5h-18z M47,52L61,52L66,71L42,71z M38,71h32v8h-32z"/>
+              <path android:fillColor="#7AAABD" android:pathData="M24,6h60a18,18 0 0 1 18,18v60a18,18 0 0 1 -18,18h-60a18,18 0 0 1 -18,-18v-60a18,18 0 0 1 18,-18z"/>
+              <path android:fillColor="#111111" android:pathData="M34,64a20,20 0 1,0 40,0a20,20 0 1,0 -40,0z"/>
+              <group>
+                  <clip-path android:pathData="M36,64a18,18 0 1,0 36,0a18,18 0 1,0 -36,0z"/>
+                  <path android:fillColor="#FFFFFF" android:pathData="M36,46h36v36h-36z"/>
+                  <path android:fillColor="#111111" android:pathData="M40.5,46.0h4.5v4.5h-4.5zM49.5,46.0h4.5v4.5h-4.5zM58.5,46.0h4.5v4.5h-4.5zM67.5,46.0h4.5v4.5h-4.5zM36.0,50.5h4.5v4.5h-4.5zM45.0,50.5h4.5v4.5h-4.5zM54.0,50.5h4.5v4.5h-4.5zM63.0,50.5h4.5v4.5h-4.5zM40.5,55.0h4.5v4.5h-4.5zM49.5,55.0h4.5v4.5h-4.5zM58.5,55.0h4.5v4.5h-4.5zM67.5,55.0h4.5v4.5h-4.5zM36.0,59.5h4.5v4.5h-4.5zM45.0,59.5h4.5v4.5h-4.5zM54.0,59.5h4.5v4.5h-4.5zM63.0,59.5h4.5v4.5h-4.5zM40.5,64.0h4.5v4.5h-4.5zM49.5,64.0h4.5v4.5h-4.5zM58.5,64.0h4.5v4.5h-4.5zM67.5,64.0h4.5v4.5h-4.5zM36.0,68.5h4.5v4.5h-4.5zM45.0,68.5h4.5v4.5h-4.5zM54.0,68.5h4.5v4.5h-4.5zM63.0,68.5h4.5v4.5h-4.5zM40.5,73.0h4.5v4.5h-4.5zM49.5,73.0h4.5v4.5h-4.5zM58.5,73.0h4.5v4.5h-4.5zM67.5,73.0h4.5v4.5h-4.5zM36.0,77.5h4.5v4.5h-4.5zM45.0,77.5h4.5v4.5h-4.5zM54.0,77.5h4.5v4.5h-4.5zM63.0,77.5h4.5v4.5h-4.5z"/>
+              </group>
+              <path android:fillColor="#111111" android:pathData="M52.5,21h3v2.5h3.5v3h-3.5v4h-3v-4h-3.5v-3h3.5z M44,32c3,-3 6.5,-3 8.5,0c1,-2 2,-2 3,0c2,-3 5.5,-3 8.5,0c1,3 -1,5.5 -3,8h-14c-2,-2.5 -4,-5 -3,-8z M45.5,40.5h17v3h-17z"/>
           </vector>
           EOF_6
           cat > app/src/main/res/drawable/ic_bg.xml << 'EOF_7'
           <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-              <path android:fillColor="#2C5A41" android:pathData="M0,0h108v108h-108z"/>
-              <path android:fillColor="#244B36" android:pathData="M0,0h54v54h-54z M54,54h54v54h-54z"/>
+              <path android:fillColor="#7AAABD" android:pathData="M0,0h108v108h-108z"/>
           </vector>
           EOF_7
           cat > app/src/main/res/drawable/ic_fg.xml << 'EOF_8'
           <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-              <path android:fillColor="#E8B84A" android:pathData="M54,28a9,9 0 1,1 -0.01,0z M45,47h18v5h-18z M47,52L61,52L66,71L42,71z M38,71h32v8h-32z"/>
+              <path android:fillColor="#111111" android:pathData="M34,64a20,20 0 1,0 40,0a20,20 0 1,0 -40,0z"/>
+              <group>
+                  <clip-path android:pathData="M36,64a18,18 0 1,0 36,0a18,18 0 1,0 -36,0z"/>
+                  <path android:fillColor="#FFFFFF" android:pathData="M36,46h36v36h-36z"/>
+                  <path android:fillColor="#111111" android:pathData="M40.5,46.0h4.5v4.5h-4.5zM49.5,46.0h4.5v4.5h-4.5zM58.5,46.0h4.5v4.5h-4.5zM67.5,46.0h4.5v4.5h-4.5zM36.0,50.5h4.5v4.5h-4.5zM45.0,50.5h4.5v4.5h-4.5zM54.0,50.5h4.5v4.5h-4.5zM63.0,50.5h4.5v4.5h-4.5zM40.5,55.0h4.5v4.5h-4.5zM49.5,55.0h4.5v4.5h-4.5zM58.5,55.0h4.5v4.5h-4.5zM67.5,55.0h4.5v4.5h-4.5zM36.0,59.5h4.5v4.5h-4.5zM45.0,59.5h4.5v4.5h-4.5zM54.0,59.5h4.5v4.5h-4.5zM63.0,59.5h4.5v4.5h-4.5zM40.5,64.0h4.5v4.5h-4.5zM49.5,64.0h4.5v4.5h-4.5zM58.5,64.0h4.5v4.5h-4.5zM67.5,64.0h4.5v4.5h-4.5zM36.0,68.5h4.5v4.5h-4.5zM45.0,68.5h4.5v4.5h-4.5zM54.0,68.5h4.5v4.5h-4.5zM63.0,68.5h4.5v4.5h-4.5zM40.5,73.0h4.5v4.5h-4.5zM49.5,73.0h4.5v4.5h-4.5zM58.5,73.0h4.5v4.5h-4.5zM67.5,73.0h4.5v4.5h-4.5zM36.0,77.5h4.5v4.5h-4.5zM45.0,77.5h4.5v4.5h-4.5zM54.0,77.5h4.5v4.5h-4.5zM63.0,77.5h4.5v4.5h-4.5z"/>
+              </group>
+              <path android:fillColor="#111111" android:pathData="M52.5,21h3v2.5h3.5v3h-3.5v4h-3v-4h-3.5v-3h3.5z M44,32c3,-3 6.5,-3 8.5,0c1,-2 2,-2 3,0c2,-3 5.5,-3 8.5,0c1,3 -1,5.5 -3,8h-14c-2,-2.5 -4,-5 -3,-8z M45.5,40.5h17v3h-17z"/>
           </vector>
           EOF_8
           cat > app/src/main/res/drawable-anydpi-v26/ic_launcher.xml << 'EOF_9'
@@ -239,1196 +253,644 @@ jobs:
               <foreground android:drawable="@drawable/ic_fg"/>
           </adaptive-icon>
           EOF_9
-          cat > app/src/main/assets/index.html << 'EOF_10'
-          <!DOCTYPE html>
-          <html lang="fr">
-          <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-          <title>Échecs Stratégie</title>
-          <style>:root{--bg:#3a3029;--card:#46342a;--card2:#5a463a;--txt:#f6ecdc;--mut:#cdb9a0;--acc:#f0a838;--ok:#5cb85c;--bad:#e0574a;--light:#efd9b4;--dark:#b4835a;--beige:#ecdcbd;--ink:#4a3a2c;--blue:#7aaabd}
-          *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-          html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Roboto,sans-serif;font-size:15px;line-height:1.5}
-          header{position:sticky;top:0;z-index:5;background:#1b1714;padding:10px 12px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px #0006}
-          header h1{font-size:18px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-          #bk,#mn{background:none;border:0;color:var(--txt);font-size:24px;padding:2px 10px 2px 4px;line-height:1}
-          #bk{display:none}
-          main{padding:12px;max-width:560px;margin:0 auto 30px}
-          #scrim{position:fixed;inset:0;background:#0009;z-index:9;opacity:0;pointer-events:none;transition:.25s}
-          #drawer{position:fixed;top:0;bottom:0;left:0;width:82%;max-width:330px;background:var(--beige);color:var(--ink);z-index:10;transform:translateX(-102%);transition:transform .25s;overflow-y:auto;box-shadow:4px 0 20px #0008}
-          body.dopen #drawer{transform:none}body.dopen #scrim{opacity:1;pointer-events:auto}
-          .dtop{background:var(--blue);padding:22px 0 18px;display:flex;justify-content:center;cursor:pointer}
-          .dtop .logo{width:120px;height:130px}
-          .dh{padding:16px 20px 6px;font-size:14px;color:#7b6a58;border-top:1px solid #d5c3a3}
-          .dh:first-child{border-top:0}
-          .di{display:flex;align-items:center;gap:22px;width:100%;background:none;border:0;padding:12px 20px;font-size:16px;color:var(--ink);text-align:left;font-family:inherit}
-          .di .dic{width:26px;text-align:center;font-size:22px;color:#3c2f24}
-          .di.on{background:#dcc8a3;border-left:4px solid #8a6a46}
-          .hero{display:flex;align-items:center;gap:14px;background:var(--blue);color:#16232b;border-radius:14px;padding:14px;margin-bottom:12px}
-          .hero .logo{width:76px;height:82px;flex:none}
-          .hero h2{margin:0;font-size:18px;line-height:1.25}.hero small{color:#24404d}
-          .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px}
-          .card h2{margin:0 0 6px;font-size:16px}
-          .mut{color:var(--mut);font-size:13px}.pad{padding:6px 4px 10px}
-          .btn{background:var(--acc);color:#2a1a05;border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:14px;font-family:inherit}
-          .btn.sec{background:var(--card2);color:var(--txt)}.btn.sm{padding:8px 10px;font-size:13px}
-          .row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1}
-          .bar{display:block;height:6px;background:#ffffff1a;border-radius:4px;overflow:hidden;margin:6px 0 2px}
-          .bar i{display:block;height:100%;background:var(--acc);border-radius:4px}
-          .rows{border-radius:12px;overflow:hidden}
-          .crow{display:flex;align-items:center;gap:14px;background:var(--card);padding:14px;border-bottom:1px solid #5a4637}
-          .crow:last-child{border-bottom:0}
-          .cic{width:44px;height:44px;border-radius:50%;background:var(--beige);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
-          .ctx{flex:1;min-width:0}.ctx b{display:block;font-size:16px}.ctx small{color:var(--mut);font-size:12.5px}
-          .chev{font-size:30px;color:var(--mut);line-height:1}
-          .acc{background:var(--card);border-bottom:1px solid #5a4637}
-          .acc:first-of-type{border-radius:12px 12px 0 0}.acc:last-child{border-radius:0 0 12px 12px;border-bottom:0}
-          .ah{display:flex;align-items:center;padding:16px 14px;gap:10px}
-          .atx{flex:1}.atx b{display:block;font-size:15.5px}.atx small{color:var(--mut)}
-          .achev{font-size:24px;color:var(--mut);transition:transform .2s;line-height:1}
-          .acc.open .achev{transform:rotate(180deg)}
-          .ab{display:none;padding:0 8px 8px}.acc.open .ab{display:block}
-          .it{display:flex;align-items:center;gap:12px;background:var(--card2);border-radius:10px;padding:10px 12px;margin-bottom:6px}
-          main>.it{background:var(--card)}
-          .it .ic{width:32px;height:32px;border-radius:50%;background:var(--beige);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
-          .it .ic.done{background:var(--ok);color:#fff}
-          .itx{flex:1;min-width:0}.itx b{display:block;font-size:14.5px;font-weight:600}.itx small{color:var(--mut)}
-          .st{color:var(--acc);font-size:18px}
-          .sh{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--acc);margin:16px 2px 8px;font-weight:700}
-          .lesson p,.lesson li{font-size:14.5px}.lesson ul{padding-left:20px;margin:6px 0}.lesson h2{font-size:17px}
-          .tb{border-collapse:collapse;width:100%;margin:8px 0}.tb td{padding:6px 8px;border-bottom:1px solid #ffffff14}.tb td:last-child{text-align:right;font-weight:700;color:var(--acc)}
-          .bw{position:relative;width:100%}
-          .bw svg.arr{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3}
-          .board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;aspect-ratio:1/1;border-radius:4px;overflow:hidden;box-shadow:0 4px 18px #0008;user-select:none;-webkit-user-select:none}
-          .sq{position:relative;aspect-ratio:1/1;min-width:0;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;line-height:1}
-          .sq.l{background:var(--light)}.sq.d{background:var(--dark)}
-          .sq.last::before,.sq.sel::before,.sq.hl::before{content:"";position:absolute;inset:0}
-          .sq.last::before{background:rgba(205,210,40,.42)}.sq.sel::before{background:rgba(40,160,255,.45)}.sq.hl::before{background:rgba(70,200,120,.55)}
-          .sq.chk{background:radial-gradient(circle,#ff3b3b 0,#ff3b3baa 35%,transparent 72%)}
-          .sq.dot::after{content:"";position:absolute;width:30%;aspect-ratio:1/1;border-radius:50%;background:rgba(20,40,30,.35)}
-          .sq.cap::after{content:"";position:absolute;inset:4%;border-radius:50%;border:4px solid rgba(20,40,30,.38)}
-          .pc{position:relative;z-index:1;font-family:"Noto Sans Symbols2","Segoe UI Symbol",serif}
-          .pc.w{color:#fffdf6;-webkit-text-stroke:1.3px #2a1d10}.pc.b{color:#161616;-webkit-text-stroke:.6px #00000080}
-          .cr,.cf{position:absolute;font-style:normal;font-size:10px;font-weight:700;opacity:.75;z-index:2;font-family:system-ui}
-          .cr{left:2px;top:2px}.cf{right:3px;bottom:1px}
-          .sq.l .cr,.sq.l .cf{color:var(--dark)}.sq.d .cr,.sq.d .cf{color:var(--light)}
-          .status{background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-weight:600;min-height:44px;display:flex;align-items:center;gap:8px}
-          .coach{border-radius:12px;padding:10px 12px;margin:10px 0;font-size:14px;background:var(--card2)}
-          .coach.good{border-left:4px solid var(--ok)}.coach.warn{border-left:4px solid var(--acc)}.coach.bad{border-left:4px solid var(--bad)}
-          .moves{background:var(--card);border-radius:12px;padding:10px;font-size:13.5px;max-height:120px;overflow:auto;word-spacing:3px;margin:10px 0}
-          .moves b{color:var(--mut);font-weight:400}
-          .seg{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin:6px 0 12px}
-          .seg button{flex:1;background:none;border:0;color:var(--mut);padding:8px 4px;border-radius:8px;font-family:inherit;font-size:13px}
-          .seg button.on{background:var(--acc);color:#2a1a05;font-weight:700}
-          .msg{border-radius:12px;padding:12px;margin:10px 0;font-size:14.5px}
-          .msg.ok{background:#2f5a35}.msg.no{background:#6a2a24}.msg.info{background:var(--card2)}
-          #promo{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:center;justify-content:center}
-          #promo div{background:var(--card);padding:16px;border-radius:14px;display:flex;gap:10px}
-          #promo button{width:60px;height:60px;font-size:40px;border-radius:10px;border:0;background:var(--light);line-height:1}
-          .spin{width:16px;height:16px;border:3px solid #ffffff30;border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;flex:none}
-          @keyframes sp{to{transform:rotate(360deg)}}
-          .tip{border-left:4px solid var(--acc)}
-          .lhead{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-          .abtn,.fav{background:var(--card2);border:0;border-radius:10px;font-size:18px;padding:6px 10px;color:var(--txt);line-height:1.2}
-          .fav.on{color:var(--acc)}
-          .ctl{display:flex;gap:8px;margin:10px 0}
-          .ctl button{flex:1;background:var(--card2);color:var(--txt);border:0;border-radius:10px;padding:10px 0;font-size:19px}
-          .ctl button.nx{background:var(--acc);color:#2a1a05}.ctl button.on{background:var(--ok);color:#fff}
-          .mvh{color:var(--acc);font-weight:800;font-size:17px;margin-bottom:4px}
-          .quiz{background:#5a4318;border-left:4px solid var(--acc);border-radius:10px;padding:10px 12px;font-size:14.5px}
-          .kpis{display:flex;gap:8px;margin-bottom:8px}
-          .kpis div{flex:1;background:var(--card);border-radius:12px;padding:12px 6px;text-align:center}
-          .kpis b{display:block;font-size:22px;color:var(--acc)}.kpis small{color:var(--mut);font-size:12px}
-          .big{font-size:52px;font-weight:800;color:var(--acc);line-height:1.1}
-          .lvl{margin-top:8px;font-size:15px}
-          .wdl{display:flex;height:14px;border-radius:7px;overflow:hidden}
-          .dbar{display:flex;justify-content:space-between;background:var(--card);border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:17px;font-weight:700}
-          #dt{color:var(--acc)}
-          </style>
-          </head>
-          <body>
-          <header><button id="mn">☰</button><button id="bk">←</button><h1 id="ttl">Échecs Stratégie</h1></header>
-          <div id="scrim"></div>
-          <aside id="drawer"><div class="dtop" id="dhome"></div><div id="dlist"></div></aside>
-          <main id="main"></main>
-          <script>
-          //ENGINE_START
-          const START='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-          const FILES='abcdefgh';
-          function sqName(i){return FILES[i&7]+(8-(i>>3));}
-          function sqIdx(s){return (8-parseInt(s[1],10))*8+FILES.indexOf(s[0]);}
-          function parseFEN(f){const p=f.trim().split(/\s+/);const b=new Array(64).fill('');let i=0;
-           for(const c of p[0]){if(c==='/')continue;if(c>='1'&&c<='8')i+=+c;else b[i++]=c;}
-           return{b,t:p[1]||'w',c:(p[2]&&p[2]!=='-')?p[2]:'',ep:(p[3]&&p[3]!=='-')?sqIdx(p[3]):-1,h:+(p[4]||0),n:+(p[5]||1)};}
-          function isW(c){return !!c&&c===c.toUpperCase();}
-          function colorOf(c){return c?(isW(c)?'w':'b'):null;}
-          const N_OFF=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
-          const K_OFF=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-          const B_DIR=[[-1,-1],[-1,1],[1,-1],[1,1]];
-          const R_DIR=[[-1,0],[1,0],[0,-1],[0,1]];
-          function inB(r,f){return r>=0&&r<8&&f>=0&&f<8;}
-          function attacked(b,sq,by){const r=sq>>3,f=sq&7;const w=by==='w';
-           const P=w?'P':'p',N=w?'N':'n',K=w?'K':'k',B=w?'B':'b',R=w?'R':'r',Q=w?'Q':'q';
-           const pr=w?r+1:r-1;
-           if(pr>=0&&pr<8){if(f>0&&b[pr*8+f-1]===P)return true;if(f<7&&b[pr*8+f+1]===P)return true;}
-           for(const[dr,df]of N_OFF){const rr=r+dr,ff=f+df;if(inB(rr,ff)&&b[rr*8+ff]===N)return true;}
-           for(const[dr,df]of K_OFF){const rr=r+dr,ff=f+df;if(inB(rr,ff)&&b[rr*8+ff]===K)return true;}
-           for(const[dr,df]of B_DIR){let rr=r+dr,ff=f+df;while(inB(rr,ff)){const x=b[rr*8+ff];if(x){if(x===B||x===Q)return true;break;}rr+=dr;ff+=df;}}
-           for(const[dr,df]of R_DIR){let rr=r+dr,ff=f+df;while(inB(rr,ff)){const x=b[rr*8+ff];if(x){if(x===R||x===Q)return true;break;}rr+=dr;ff+=df;}}
-           return false;}
-          function kingSq(b,c){return b.indexOf(c==='w'?'K':'k');}
-          function inCheck(s,c){c=c||s.t;const k=kingSq(s.b,c);return k>=0&&attacked(s.b,k,c==='w'?'b':'w');}
-          function pseudo(s){const b=s.b,t=s.t,opp=t==='w'?'b':'w',mv=[];
-           for(let i=0;i<64;i++){const p=b[i];if(!p||colorOf(p)!==t)continue;const r=i>>3,f=i&7,u=p.toUpperCase();
-            if(u==='P'){const dir=t==='w'?-1:1,start=t==='w'?6:1,last=t==='w'?0:7,r1=r+dir;
-             const push=(to,x,ep)=>{if((to>>3)===last){for(const pr of['q','r','b','n'])mv.push({f:i,t:to,p,x,pr});}else mv.push({f:i,t:to,p,x,ep});};
-             if(r1>=0&&r1<8&&!b[r1*8+f]){push(r1*8+f,'');if(r===start&&!b[(r+2*dir)*8+f])mv.push({f:i,t:(r+2*dir)*8+f,p,x:'',dbl:1});}
-             for(const df of[-1,1]){const ff=f+df;if(ff<0||ff>7||r1<0||r1>7)continue;const to=r1*8+ff,x=b[to];
-              if(x&&colorOf(x)===opp)push(to,x);else if(to===s.ep&&!x)push(to,t==='w'?'p':'P',1);}
-            }else if(u==='N'||u==='K'){for(const[dr,df]of(u==='N'?N_OFF:K_OFF)){const rr=r+dr,ff=f+df;if(!inB(rr,ff))continue;const to=rr*8+ff,x=b[to];if(!x||colorOf(x)===opp)mv.push({f:i,t:to,p,x:x||''});}
-             if(u==='K'){
-              if(t==='w'&&i===60&&!attacked(b,60,'b')){
-               if(s.c.includes('K')&&!b[61]&&!b[62]&&b[63]==='R'&&!attacked(b,61,'b')&&!attacked(b,62,'b'))mv.push({f:60,t:62,p,x:'',ck:1});
-               if(s.c.includes('Q')&&!b[59]&&!b[58]&&!b[57]&&b[56]==='R'&&!attacked(b,59,'b')&&!attacked(b,58,'b'))mv.push({f:60,t:58,p,x:'',cq:1});}
-              if(t==='b'&&i===4&&!attacked(b,4,'w')){
-               if(s.c.includes('k')&&!b[5]&&!b[6]&&b[7]==='r'&&!attacked(b,5,'w')&&!attacked(b,6,'w'))mv.push({f:4,t:6,p,x:'',ck:1});
-               if(s.c.includes('q')&&!b[3]&&!b[2]&&!b[1]&&b[0]==='r'&&!attacked(b,3,'w')&&!attacked(b,2,'w'))mv.push({f:4,t:2,p,x:'',cq:1});}}
-            }else{const dirs=u==='B'?B_DIR:u==='R'?R_DIR:B_DIR.concat(R_DIR);
-             for(const[dr,df]of dirs){let rr=r+dr,ff=f+df;while(inB(rr,ff)){const to=rr*8+ff,x=b[to];if(x){if(colorOf(x)===opp)mv.push({f:i,t:to,p,x});break;}mv.push({f:i,t:to,p,x:''});rr+=dr;ff+=df;}}}
-           }
-           return mv;}
-          function make(s,m){const b=s.b.slice(),t=s.t;
-           b[m.t]=m.pr?(t==='w'?m.pr.toUpperCase():m.pr):m.p;b[m.f]='';
-           if(m.ep)b[m.t+(t==='w'?8:-8)]='';
-           if(m.ck){if(t==='w'){b[61]='R';b[63]='';}else{b[5]='r';b[7]='';}}
-           if(m.cq){if(t==='w'){b[59]='R';b[56]='';}else{b[3]='r';b[0]='';}}
-           let c=s.c;
-           if(c){if(m.p==='K')c=c.replace('K','').replace('Q','');if(m.p==='k')c=c.replace('k','').replace('q','');
-            for(const q of[m.f,m.t]){if(q===63)c=c.replace('K','');if(q===56)c=c.replace('Q','');if(q===7)c=c.replace('k','');if(q===0)c=c.replace('q','');}}
-           return{b,t:t==='w'?'b':'w',c,ep:m.dbl?(m.f+m.t)/2:-1,h:(m.p==='P'||m.p==='p'||m.x)?0:s.h+1,n:s.n+(t==='b'?1:0)};}
-          function legal(s){return pseudo(s).filter(m=>!inCheck(make(s,m),s.t));}
-          function uci(m){return sqName(m.f)+sqName(m.t)+(m.pr||'');}
-          function insufficient(b){const o=b.filter(x=>x&&x!=='K'&&x!=='k');if(!o.length)return true;if(o.length===1&&/[nbNB]/.test(o[0]))return true;return false;}
-          function status(s){if(!legal(s).length)return inCheck(s)?'mate':'pat';if(s.h>=100)return'50';if(insufficient(s.b))return'mat';return null;}
-          const FR={K:'R',Q:'D',R:'T',B:'F',N:'C'};
-          function san(s,m,all){let str;
-           if(m.ck)str='O-O';else if(m.cq)str='O-O-O';else{const u=m.p.toUpperCase();
-            if(u==='P')str=(m.x?FILES[m.f&7]+'x':'')+sqName(m.t)+(m.pr?'='+FR[m.pr.toUpperCase()]:'');
-            else{let dis='';const o=(all||legal(s)).filter(z=>z.p===m.p&&z.t===m.t&&z.f!==m.f);
-             if(o.length){const sf=o.some(z=>(z.f&7)===(m.f&7)),sr=o.some(z=>(z.f>>3)===(m.f>>3));dis=!sf?FILES[m.f&7]:!sr?String(8-(m.f>>3)):sqName(m.f);}
-             str=FR[u]+dis+(m.x?'x':'')+sqName(m.t);}}
-           const n=make(s,m);if(inCheck(n))str+=legal(n).length?'+':'#';return str;}
-          const VAL={P:100,N:320,B:330,R:500,Q:900,K:0};
-          const PST={
-          P:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0],
-          N:[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,0,0,0,-20,-40,-30,0,10,15,15,10,0,-30,-30,5,15,20,20,15,5,-30,-30,0,15,20,20,15,0,-30,-30,5,10,15,15,10,5,-30,-40,-20,0,5,5,0,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50],
-          B:[-20,-10,-10,-10,-10,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,10,10,5,0,-10,-10,5,5,10,10,5,5,-10,-10,0,10,10,10,10,0,-10,-10,10,10,10,10,10,10,-10,-10,5,0,0,0,0,5,-10,-20,-10,-10,-10,-10,-10,-10,-20],
-          R:[0,0,0,0,0,0,0,0,5,10,10,10,10,10,10,5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,0,0,0,5,5,0,0,0],
-          Q:[-20,-10,-10,-5,-5,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,5,5,5,0,-10,-5,0,5,5,5,5,0,-5,0,0,5,5,5,5,0,-5,-10,5,5,5,5,5,0,-10,-10,0,5,0,0,0,0,-10,-20,-10,-10,-5,-5,-10,-10,-20],
-          K:[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20],
-          KE:[-50,-40,-30,-20,-20,-30,-40,-50,-30,-20,-10,0,0,-10,-20,-30,-30,-10,20,30,30,20,-10,-30,-30,-10,30,40,40,30,-10,-30,-30,-10,30,40,40,30,-10,-30,-30,-10,20,30,30,20,-10,-30,-30,-30,0,0,0,0,-30,-30,-50,-30,-30,-30,-30,-30,-30,-50]};
-          function evaluate(s){const b=s.b;let mat=0,sc=0;
-           for(let i=0;i<64;i++){const p=b[i];if(p&&p!=='P'&&p!=='p'&&p!=='K'&&p!=='k')mat+=VAL[p.toUpperCase()];}
-           const end=mat<=1500;
-           for(let i=0;i<64;i++){const p=b[i];if(!p)continue;const u=p.toUpperCase();const tb=(u==='K'&&end)?PST.KE:PST[u];
-            if(p===u)sc+=VAL[u]+tb[i];else sc-=VAL[u]+tb[i^56];}
-           return s.t==='w'?sc:-sc;}
-          function mscore(m){let v=0;if(m.x)v+=10*VAL[m.x.toUpperCase()]-VAL[m.p.toUpperCase()]+1000;if(m.pr)v+=800;return v;}
-          function order(ms){return ms.sort((a,b)=>mscore(b)-mscore(a));}
-          const MATE=100000;let NODES=0,DEADLINE=Infinity;
-          function tick(){if((++NODES&1023)===0&&Date.now()>DEADLINE)throw 'T';}
-          function quies(s,a,be,qd){tick();const st=evaluate(s);if(st>=be)return st;if(st>a)a=st;if(qd>=5)return a;
-           const ms=order(pseudo(s).filter(m=>m.x||m.pr));
-           for(const m of ms){const n=make(s,m);if(inCheck(n,s.t))continue;const v=-quies(n,-be,-a,qd+1);if(v>=be)return v;if(v>a)a=v;}
-           return a;}
-          function negamax(s,d,a,be,ply){tick();
-           if(d<=0)return quies(s,a,be,0);
-           const ms=legal(s);if(!ms.length)return inCheck(s)?-MATE+ply:0;if(s.h>=100)return 0;
-           order(ms);let best=-Infinity;
-           for(const m of ms){const v=-negamax(make(s,m),d-1,-be,-a,ply+1);if(v>best)best=v;if(v>a)a=v;if(a>=be)break;}
-           return best;}
-          function think(s,lv){let ms=order(legal(s));if(!ms.length)return null;if(ms.length===1)return ms[0];
-           DEADLINE=Date.now()+lv.time;NODES=0;let res=null;
-           for(let d=1;d<=lv.depth;d++){try{const sc=[];let best=-Infinity;
-             for(const m of ms){const lo=best===-Infinity?-Infinity:best-lv.noise-1;const v=-negamax(make(s,m),d-1,-Infinity,-lo,1);sc.push({m,v});if(v>best)best=v;}
-             sc.sort((a,b)=>b.v-a.v);res=sc;ms=sc.map(z=>z.m);if(best>MATE-500)break;
-            }catch(e){if(e!=='T')throw e;break;}}
-           DEADLINE=Infinity;if(!res)return ms[0];
-           const top=res[0].v;if(lv.noise<=0||top>MATE-500)return res[0].m;
-           const c=res.filter(z=>z.v>=top-lv.noise);return c[Math.floor(Math.random()*c.length)].m;}
-          function rootScores(s,d){DEADLINE=Infinity;const ms=order(legal(s));return ms.map(m=>({m,v:-negamax(make(s,m),d-1,-Infinity,Infinity,1)}));}
-          //ENGINE_END
-          function toFEN(s){let o='';for(let r=0;r<8;r++){let e=0;for(let f=0;f<8;f++){const p=s.b[r*8+f];if(!p)e++;else{if(e){o+=e;e=0;}o+=p;}}if(e)o+=e;if(r<7)o+='/';}
-           return o+' '+s.t+' '+(s.c||'-')+' '+(s.ep>=0?sqName(s.ep):'-')+' '+s.h+' '+s.n;}
-          const GLYPH={K:'♚︎',Q:'♛︎',R:'♜︎',B:'♝︎',N:'♞︎',P:'♟︎'};
-          function txt(h){return String(h).replace(/([♔-♟])/g,'$1︎');}
-          const $=id=>document.getElementById(id);
-          let ST={l:{},p:{},pfail:{},fav:{},err:[],game:null,audio:true,stats:{pa:0,ps:0,pf:0,gw:0,gl:0,gd:0,db:0,dn:0},set:{mode:'ai',color:'w',level:1,coach:true}};
-          try{const x=JSON.parse(localStorage.getItem('echecs_v1')||'null');if(x){ST=Object.assign(ST,x);ST.stats=Object.assign({pa:0,ps:0,pf:0,gw:0,gl:0,gd:0,db:0,dn:0},x.stats||{});ST.pfail=ST.pfail||{};ST.fav=ST.fav||{};ST.err=ST.err||[];}}catch(e){}
-          function save(){try{localStorage.setItem('echecs_v1',JSON.stringify(ST));}catch(e){}}
-
-          /* ---------- Voix française ---------- */
-          const TTS={cur:null,cb:null,n:0};
-          function cleanSpeech(t){return String(t||'').replace(/<[^>]+>/g,' ').replace(/[♔-♟︎]/g,'').replace(/[«»✅❌🎯💡⚠️👍🏆★]/g,'').replace(/\s+/g,' ').trim();}
-          function speak(t,cb){stopSpeak();const c=cleanSpeech(t);const id='u'+(++TTS.n);TTS.cur=id;TTS.cb=cb||null;
-           if(!ST.audio||!c){setTimeout(()=>ttsDone(id),Math.max(1500,c.length*55));return;}
-           try{if(window.AndroidTTS){AndroidTTS.speak(c,id);return;}
-            if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(c);u.lang='fr-FR';u.rate=.95;u.onend=()=>ttsDone(id);u.onerror=()=>ttsDone(id);speechSynthesis.speak(u);return;}}catch(e){}
-           setTimeout(()=>ttsDone(id),c.length*65);}
-          window.ttsDone=function(id){if(id!==TTS.cur)return;const c=TTS.cb;TTS.cb=null;TTS.cur=null;if(c)c();};
-          function stopSpeak(){TTS.cur=null;TTS.cb=null;try{if(window.AndroidTTS)AndroidTTS.stop();else if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}}
-          function ttsReady(){try{return window.AndroidTTS?AndroidTTS.ready():!!window.speechSynthesis;}catch(e){return false;}}
-          const PNAME={K:'Roi',Q:'Dame',R:'Tour',B:'Fou',N:'Cavalier',P:'Pion'};
-          function moveWords(s,m){let w;if(m.ck)w='Petit roque';else if(m.cq)w='Grand roque';
-           else{w=PNAME[m.p.toUpperCase()]+(m.x?' prend en ':' en ')+sqName(m.t);if(m.pr)w+=', promotion en '+PNAME[m.pr.toUpperCase()].toLowerCase();}
-           const n=make(s,m);if(inCheck(n))w+=legal(n).length?', échec':', échec et mat';return w+'.';}
-
-          /* ---------- Plateau ---------- */
-          const BOARDS=[];
-          const ACOL={g:'#16a34a',r:'#e0453a',b:'#2f7fe0',y:'#f2b632'};
-          function arrowSVG(a,flip){let col=ACOL.g,s=a;if(a[1]===':'){col=ACOL[a[0]]||col;s=a.slice(2);}
-           const P=i=>{let x=(i&7)+.5,y=(i>>3)+.5;if(flip){x=8-x;y=8-y;}return[x,y];};
-           const[x1,y1]=P(sqIdx(s.slice(0,2))),[x2,y2]=P(sqIdx(s.slice(2,4)));const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
-           const hx=x2-ux*.12,hy=y2-uy*.12,bx=hx-ux*.4,by=hy-uy*.4,px=-uy*.24,py=ux*.24;
-           return '<line x1="'+x1+'" y1="'+y1+'" x2="'+bx+'" y2="'+by+'" stroke="'+col+'" stroke-width=".18" stroke-linecap="round" opacity=".85"/>'+
-            '<polygon points="'+hx+','+hy+' '+(bx+px)+','+(by+py)+' '+(bx-px)+','+(by-py)+'" fill="'+col+'" opacity=".9"/>';}
-          function Board(el){el.classList.add('bw');el.innerHTML='<div class="board"></div><svg viewBox="0 0 8 8" class="arr"></svg>';
-           const GR=el.firstChild,SV=el.lastChild;
-           const B={el,s:null,flip:false,sel:-1,last:null,hl:[],arrows:[],allow:null,peek:true,onMove:null};
-           B.set=function(s,last){B.s=s;B.sel=-1;B.last=last||null;B.render();};
-           B.render=function(){const s=B.s;if(!s)return;const tg={};
-            if(B.sel>=0&&s.b[B.sel]){const c=colorOf(s.b[B.sel]);const ss=c===s.t?s:Object.assign({},s,{t:c,ep:-1});legal(ss).forEach(m=>{if(m.f===B.sel)tg[m.t]=m.x?'cap':'dot';});}
-            const ck=inCheck(s)?kingSq(s.b,s.t):-1;let out='';
-            for(let v=0;v<64;v++){const i=B.flip?63-v:v,r=i>>3,f=i&7;let cls='sq '+((r+f)%2===0?'l':'d');
-             if(B.last&&(i===B.last.f||i===B.last.t))cls+=' last';if(i===B.sel)cls+=' sel';if(B.hl.includes(i))cls+=' hl';if(i===ck)cls+=' chk';if(tg[i])cls+=' '+tg[i];
-             const p=s.b[i];let inner=p?'<span class="pc '+(isW(p)?'w':'b')+'">'+GLYPH[p.toUpperCase()]+'</span>':'';
-             if((v&7)===0)inner+='<i class="cr">'+(8-r)+'</i>';if((v>>3)===7)inner+='<i class="cf">'+FILES[f]+'</i>';
-             out+='<div class="'+cls+'" data-i="'+i+'">'+inner+'</div>';}
-            GR.innerHTML=out;GR.style.fontSize=(GR.clientWidth/8*0.8)+'px';SV.innerHTML=B.arrows.map(a=>arrowSVG(a,B.flip)).join('');};
-           GR.addEventListener('click',e=>{const d=e.target.closest('.sq');if(!d||!B.s)return;const i=+d.dataset.i,s=B.s;
-            if(B.sel>=0&&B.onMove&&B.allow){const ms=legal(s).filter(m=>m.f===B.sel&&m.t===i);
-             if(ms.length&&(B.allow==='both'||B.allow===s.t)){B.sel=-1;if(ms.length>1){B.render();askPromo(s.t,pr=>B.onMove(ms.find(x=>x.pr===pr)));}else B.onMove(ms[0]);return;}}
-            const p=s.b[i];if(p&&(B.peek||(B.allow&&colorOf(p)===s.t)))B.sel=(B.sel===i)?-1:i;else B.sel=-1;B.render();});
-           BOARDS.push(B);return B;}
-          window.addEventListener('resize',()=>BOARDS.forEach(b=>{if(document.body.contains(b.el))b.render();}));
-          function askPromo(c,cb){const o=document.createElement('div');o.id='promo';const w=c==='w';
-           o.innerHTML='<div>'+['q','r','b','n'].map(p=>'<button data-p="'+p+'"><span class="pc '+(w?'w':'b')+'">'+GLYPH[p.toUpperCase()]+'</span></button>').join('')+'</div>';
-           o.onclick=e=>{const bt=e.target.closest('button');if(!bt)return;o.remove();cb(bt.dataset.p);};document.body.appendChild(o);}
-
-          const LESSONS=[
-          /* ================= LES BASES ================= */
-          {id:'valeurs',mod:'Les bases',t:'La valeur des pièces',fen:'4k3/4p3/3n4/8/8/8/8/3RK3 w - - 0 1',
-          intro:`<p>Avant toute stratégie, il faut savoir <b>ce que vaut chaque pièce</b>. Ces valeurs servent à décider si un échange est bon.</p>
-          <table class="tb"><tr><td>♟ Pion</td><td>1</td></tr><tr><td>♞ Cavalier</td><td>3</td></tr><tr><td>♝ Fou</td><td>3</td></tr><tr><td>♜ Tour</td><td>5</td></tr><tr><td>♛ Dame</td><td>9</td></tr><tr><td>♚ Roi</td><td>∞</td></tr></table>`,
-          steps:[
-          {s:"Exemple : la tour blanche peut prendre le cavalier en d6. Mais attention, il est défendu par le pion e7.",a:['r:d1d6','g:e7d6']},
-          {m:'d1d6',s:"Si la tour prend le cavalier…"},
-          {m:'e7d6',s:"…le pion reprend. Les Blancs ont donné une tour, qui vaut 5, contre un cavalier qui vaut 3. Mauvaise affaire ! Avant chaque prise, comptez les attaquants et les défenseurs."}]},
-          {id:'centre',mod:'Les bases',t:'Contrôler le centre',
-          intro:`<p>Les quatre cases centrales <b>d4, e4, d5, e5</b> sont les plus importantes. Celui qui les contrôle a plus d'espace et ses pièces sont plus actives.</p>`,h:['d4','e4','d5','e5'],
-          steps:[
-          {m:'e2e4',s:"Le pion du roi avance de deux cases et occupe le centre. Il ouvre aussi la route à la dame et au fou.",a:['b:f1c4','b:d1h5'],h:['e4']},
-          {m:'e7e5',s:"Les Noirs répondent de la même façon et prennent leur part du centre.",h:['e5']},
-          {q:'g1f3',p:"À vous ! Sortez une pièce qui attaque le pion e5.",s:"Parfait. Le cavalier se développe et attaque e5.",a:['r:f3e5']},
-          {m:'b8c6',s:"Le cavalier noir défend le pion e5.",a:['g:c6e5']},
-          {m:'d2d4',s:"Les Blancs ajoutent un second pion au centre et attaquent encore e5.",a:['r:d4e5'],h:['d4','e4']},
-          {m:'e5d4',s:"Les Noirs échangent au centre."},
-          {m:'f3d4',s:"Le cavalier reprend et s'installe sur une case centrale. C'est la partie écossaise : les Blancs ont plus d'espace.",h:['d4','e4']}]},
-          {id:'dev',mod:'Les bases',t:'Développer ses pièces',
-          intro:`<p>Dans l'ouverture, le but est de <b>sortir rapidement les cavaliers et les fous</b>, puis de roquer. Chaque coup doit faire entrer une nouvelle pièce en jeu.</p>`,
-          steps:[
-          {m:'e2e4',s:"Un pion central libère le fou et la dame."},
-          {m:'e7e5',s:"Même idée pour les Noirs."},
-          {m:'g1f3',s:"Les cavaliers sortent en général avant les fous.",a:['r:f3e5']},
-          {m:'b8c6',s:"Le cavalier noir défend e5."},
-          {q:'f1c4',p:"À vous : développez le fou vers une case active, qui vise le roi noir.",s:"Très bien. Le fou vise f7, le point faible près du roi noir.",a:['r:c4f7']},
-          {m:'f8c5',s:"Les Noirs font de même, leur fou vise f2.",a:['r:c5f2']},
-          {m:'e1g1',s:"Les Blancs roquent : le roi est à l'abri, la tour est développée. Quatre coups, et presque tout est prêt !"},
-          {m:'g8f6',s:"Les Noirs sortent leur dernier cavalier. Règle d'or : ne bougez pas deux fois la même pièce dans l'ouverture sans bonne raison."}]},
-          {id:'roque',mod:'Les bases',t:'Mettre son roi à l’abri : le roque',pre:['e2e4','e7e5','g1f3','b8c6','f1c4','f8c5'],
-          intro:`<p>Au centre, le roi est exposé dès que les colonnes s'ouvrent. Le <b>roque</b> le met à l'abri derrière ses pions et active une tour, en un seul coup.</p><ul><li>Interdit si le roi est en échec.</li><li>Interdit si le roi traverse une case attaquée.</li><li>Interdit si le roi ou la tour ont déjà bougé.</li></ul>`,
-          steps:[
-          {q:'e1g1',p:"À vous : faites le petit roque. Touchez le roi, puis la case g1.",s:"Le roi est en g1, la tour en f1. Les pions f2, g2 et h2 forment un bouclier.",h:['g1','f1']},
-          {m:'g8f6',s:"Les Noirs développent leur cavalier."},
-          {m:'d2d3',s:"Les Blancs ouvrent la route à leur fou c1."},
-          {m:'e8g8',s:"Les Noirs roquent aussi. Après le roque, évitez d'avancer les pions devant votre roi : ils sont son armure.",h:['g8','f8']}]},
-          {id:'dame',mod:'Les bases',t:'Ne sortez pas la dame trop tôt',
-          intro:`<p>La dame vaut 9 : dès qu'une pièce plus faible l'attaque, elle doit fuir, et on perd du temps. Voyons ce qui arrive quand on la sort trop tôt.</p>`,
-          steps:[
-          {m:'e2e4',s:"Début normal."},{m:'e7e5',s:""},
-          {m:'d1h5',s:"La dame sort dès le deuxième coup et menace déjà le pion e5 et le point f7.",a:['r:h5e5','r:h5f7']},
-          {m:'b8c6',s:"Les Noirs défendent e5 en développant une pièce."},
-          {m:'f1c4',s:"Le fou vise f7 : menace de mat en f7 !",a:['r:c4f7','r:h5f7']},
-          {q:'g7g6',ok:['d8e7','d8f6'],p:"À vous avec les Noirs : défendez-vous en chassant la dame avec un pion.",s:"Bien joué ! Le pion attaque la dame, qui doit encore bouger.",a:['r:g6h5']},
-          {m:'h5f3',s:"La dame revient menacer f7.",a:['r:f3f7']},
-          {m:'g8f6',s:"Le cavalier défend f7 tout en se développant."},
-          {m:'f3b3',s:"La dame bouge pour la quatrième fois, en visant f7 avec le fou.",a:['r:c4f7']},
-          {m:'d8e7',s:"La dame noire défend f7."},
-          {m:'b1c3',s:""},
-          {m:'c6d4',s:"Le cavalier attaque la dame et le pion c2, avec gain de temps. Les Noirs ont trois pièces développées, les Blancs ont perdu beaucoup de temps.",a:['r:d4b3','r:d4c2']}]},
-          {id:'methode',mod:'Les bases',t:'La méthode : échecs, prises, menaces',fen:'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3',
-          intro:`<p>La plupart des parties se perdent sur une erreur tactique. Avant <b>chaque</b> coup, vérifiez dans cet ordre :</p><ul><li><b>Échecs</b> : lesquels puis-je donner ? Lesquels peut-il donner ?</li><li><b>Prises</b> : quelles pièces peuvent être prises ?</li><li><b>Menaces</b> : que veut faire l'adversaire avec son dernier coup ?</li></ul><p>Puis le <b>contrôle anti-gaffe</b> : après mon coup, une pièce reste-t-elle sans défense ?</p>`,
-          steps:[
-          {s:"Ici les Noirs viennent de jouer cavalier f6, sans regarder la menace blanche. Quelle est la menace ?",a:['r:h5f7','r:c4f7']},
-          {m:'a7a6',s:"Les Noirs jouent un coup sans réfléchir…"},
-          {q:'h5f7',p:"Appliquez la méthode : regardez d'abord les échecs !",s:"Échec et mat ! Un simple contrôle des échecs et des prises aurait évité cela aux Noirs."}]},
-
-          /* ================= LES OUVERTURES ================= */
-          {id:'italienne',mod:'Les ouvertures',t:'La partie italienne',
-          intro:`<p>L'une des plus anciennes ouvertures. Les Blancs développent vite leurs pièces et visent le point faible <b>f7</b>. Idéale pour apprendre.</p><p class="mut">1.e4 e5 2.Cf3 Cc6 3.Fc4</p>`,
-          steps:[
-          {m:'e2e4',s:"Les Blancs occupent le centre."},
-          {m:'e7e5',s:"Les Noirs prennent leur part du centre."},
-          {q:'g1f3',p:"À vous : développez une pièce en attaquant le pion e5.",s:"Le cavalier sort et attaque e5.",a:['r:f3e5']},
-          {m:'b8c6',s:"Le cavalier noir défend e5.",a:['g:c6e5']},
-          {q:'f1c4',p:"Placez le fou sur la diagonale qui vise f7, le point le plus faible des Noirs.",s:"Voilà la partie italienne. Le pion f7 n'est défendu que par le roi.",a:['r:c4f7']},
-          {m:'f8c5',s:"Les Noirs copient : leur fou vise f2. C'est le Giuoco Piano, le jeu tranquille.",a:['r:c5f2']},
-          {m:'c2c3',s:"Les Blancs préparent d4 pour construire un grand centre.",a:['b:d2d4']},
-          {m:'g8f6',s:"Les Noirs développent et attaquent le pion e4.",a:['r:f6e4']},
-          {m:'d2d4',s:"Les Blancs frappent au centre et attaquent le fou c5 et le pion e5."},
-          {m:'e5d4',s:"Les Noirs prennent."},
-          {m:'c3d4',s:"Les Blancs reprennent : deux pions centraux côte à côte, un idéal.",h:['d4','e4']},
-          {m:'c5b4',s:"Échec du fou : les Noirs gagnent un temps."},
-          {m:'c1d2',s:"Les Blancs couvrent l'échec en développant le fou."},
-          {m:'b4d2',s:"Les Noirs échangent les fous."},
-          {m:'b1d2',s:"Le cavalier reprend et se développe."},
-          {m:'d7d5',s:"Les Noirs contestent tout de suite le centre : c'est le bon réflexe."},
-          {m:'e4d5',s:""},{m:'f6d5',s:"Le cavalier reprend et s'installe au centre."},
-          {m:'d1b3',s:"La dame attaque le pion b7, et le fou c4 vise le cavalier d5. Position équilibrée, pleine d'idées pour les deux camps.",a:['r:b3b7','r:c4d5']}]},
-          {id:'espagnole',mod:'Les ouvertures',t:'La partie espagnole',
-          intro:`<p>Aussi appelée <b>Ruy Lopez</b>, c'est l'ouverture préférée des champions du monde. Les Blancs mettent une pression durable sur le pion e5.</p><p class="mut">1.e4 e5 2.Cf3 Cc6 3.Fb5</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},{m:'g1f3',s:"Attaque du pion e5."},{m:'b8c6',s:"Défense du pion e5."},
-          {q:'f1b5',p:"À vous : attaquez la pièce qui défend le pion e5.",s:"C'est la partie espagnole. Le fou attaque le défenseur de e5.",a:['r:b5c6','g:c6e5']},
-          {m:'a7a6',s:"Les Noirs demandent au fou ce qu'il veut faire. C'est la suite la plus jouée.",a:['r:a6b5']},
-          {m:'b5a4',s:"Le fou recule mais garde le contact avec le cavalier."},
-          {m:'g8f6',s:"Les Noirs développent et attaquent le pion e4.",a:['r:f6e4']},
-          {q:'e1g1',p:"À vous : le pion e4 n'est pas vraiment en danger. Mettez votre roi à l'abri.",s:"Le roque. Si le cavalier prend e4, la tour viendra en e1 et regagnera le pion."},
-          {m:'f8e7',s:"Les Noirs préparent leur propre roque."},
-          {m:'f1e1',s:"La tour défend e4.",a:['g:e1e4']},
-          {m:'b7b5',s:"Les Noirs chassent le fou.",a:['r:b5a4']},
-          {m:'a4b3',s:"Le fou se place sur une excellente diagonale qui vise f7.",a:['r:b3f7']},
-          {m:'d7d6',s:"Les Noirs consolident e5 et libèrent leur fou c8."},
-          {m:'c2c3',s:"Les Blancs préparent d4, et une case de retraite en c2 pour le fou."},
-          {m:'e8g8',s:"Les Noirs roquent à leur tour."},
-          {m:'h2h3',s:"Petit coup important : il empêche le fou c8 de venir clouer le cavalier en g4. Position typique, riche en plans.",a:['r:c8g4']}]},
-          {id:'sicilienne',mod:'Les ouvertures',t:'La défense sicilienne',
-          intro:`<p>La réponse la plus combative à 1.e4. Les Noirs contrôlent d4 avec un pion de côté et créent un <b>déséquilibre</b> : ils jouent pour gagner.</p><p class="mut">1.e4 c5</p>`,
-          steps:[
-          {m:'e2e4',s:""},
-          {m:'c7c5',s:"La défense sicilienne ! Le pion c5 contrôle la case d4.",a:['g:c5d4']},
-          {m:'g1f3',s:"Développement et préparation de d4."},
-          {m:'d7d6',s:"Les Noirs contrôlent e5 et libèrent le fou c8."},
-          {m:'d2d4',s:"Les Blancs ouvrent le jeu."},
-          {m:'c5d4',s:"Les Noirs échangent un pion de côté contre un pion central : c'est l'idée clé de la Sicilienne."},
-          {m:'f3d4',s:"Le cavalier reprend au centre."},
-          {m:'g8f6',s:"Développement avec attaque du pion e4.",a:['r:f6e4']},
-          {q:'b1c3',p:"À vous : défendez le pion e4 en développant une pièce.",s:"Le cavalier défend e4.",a:['g:c3e4']},
-          {m:'a7a6',s:"La variante Najdorf, préférée de Fischer et Kasparov. Le petit coup a6 interdit la case b5 aux pièces blanches et prépare b5.",a:['b:b7b5']},
-          {m:'c1e3',s:"Les Blancs développent le fou."},
-          {m:'e7e5',s:"Les Noirs chassent le cavalier et gagnent de l'espace.",a:['r:e5d4']},
-          {m:'d4b3',s:"Le cavalier recule."},
-          {m:'c8e6',s:"Le fou contrôle d5, la case clé de cette position.",a:['g:e6d5'],h:['d5']},
-          {m:'f2f3',s:"Les Blancs consolident e4 et préparent une attaque de pions avec g4. Souvent, les deux camps roquent de côtés opposés.",a:['b:g2g4']}]},
-          {id:'francaise',mod:'Les ouvertures',t:'La défense française',
-          intro:`<p>Les Noirs préparent d5 pour attaquer e4. Ouverture <b>solide</b> : les Noirs acceptent moins d'espace pour attaquer ensuite la chaîne de pions blanche.</p><p class="mut">1.e4 e6 2.d4 d5</p>`,
-          steps:[
-          {m:'e2e4',s:""},
-          {m:'e7e6',s:"La défense française. Les Noirs préparent d5.",a:['b:d7d5']},
-          {m:'d2d4',s:"Les Blancs construisent un grand centre."},
-          {m:'d7d5',s:"Attaque du pion e4.",a:['r:d5e4']},
-          {m:'b1c3',s:"Le cavalier défend e4.",a:['g:c3e4']},
-          {m:'g8f6',s:"Une deuxième attaque sur e4.",a:['r:f6e4']},
-          {m:'e4e5',s:"Les Blancs avancent et chassent le cavalier, en gagnant de l'espace."},
-          {m:'f6d7',s:"Le cavalier recule."},
-          {m:'f2f4',s:"Les Blancs soutiennent e5 : un centre énorme.",h:['d4','e5','f4']},
-          {q:'c7c5',p:"À vous avec les Noirs : attaquez la base de la chaîne de pions blanche.",s:"C'est le plan de la Française : on attaque la chaîne à sa base, le pion d4.",a:['r:c5d4'],h:['d4']},
-          {m:'g1f3',s:"Le cavalier soutient d4."},
-          {m:'b8c6',s:"Deuxième attaque sur d4.",a:['r:c6d4']},
-          {m:'c1e3',s:"Troisième défenseur pour d4."},
-          {m:'c5d4',s:"Les Noirs échangent."},
-          {m:'f3d4',s:""},
-          {m:'f8c5',s:"Les Noirs attaquent encore le cavalier d4. Toute la partie tourne autour de cette case.",a:['r:c5d4']}]},
-          {id:'carokann',mod:'Les ouvertures',t:'La défense Caro-Kann',
-          intro:`<p>Comme la Française, les Noirs préparent d5, mais le fou c8 reste <b>libre de sortir</b>. Ouverture très solide, sans faiblesses.</p><p class="mut">1.e4 c6 2.d4 d5</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'c7c6',s:"La Caro-Kann prépare d5.",a:['b:d7d5']},
-          {m:'d2d4',s:""},{m:'d7d5',s:"Attaque du pion e4."},
-          {m:'b1c3',s:"Défense du pion e4."},{m:'d5e4',s:"Les Noirs échangent au centre."},
-          {m:'c3e4',s:"Le cavalier reprend."},
-          {q:'c8f5',p:"À vous avec les Noirs : sortez le fou c8 en attaquant le cavalier.",s:"Exactement ! Le fou sort avant e6 : c'est l'avantage de la Caro-Kann sur la Française.",a:['r:f5e4']},
-          {m:'e4g3',s:"Le cavalier recule et attaque le fou.",a:['r:g3f5']},
-          {m:'f5g6',s:"Le fou se replace."},
-          {m:'h2h4',s:"Les Blancs menacent h5 pour piéger le fou.",a:['b:h4h5']},
-          {m:'h7h6',s:"Les Noirs donnent une case de retraite au fou."},
-          {m:'g1f3',s:""},{m:'b8d7',s:"Développement souple."},
-          {m:'h4h5',s:"Le pion chasse le fou."},{m:'g6h7',s:"Le fou recule en h7."},
-          {m:'f1d3',s:"Les Blancs proposent l'échange des fous."},
-          {m:'h7d3',s:""},
-          {m:'d1d3',s:"Les Noirs ont une position très solide, sans faiblesses : c'est l'esprit de la Caro-Kann."}]},
-          {id:'gambitdame',mod:'Les ouvertures',t:'Le gambit dame',
-          intro:`<p>Les Blancs offrent un pion de côté pour attaquer le centre noir. Ce n'est pas un vrai sacrifice : le pion est souvent récupéré.</p><p class="mut">1.d4 d5 2.c4</p>`,
-          steps:[
-          {m:'d2d4',s:"Le pion de la dame au centre."},{m:'d7d5',s:"Les Noirs bloquent."},
-          {q:'c2c4',p:"À vous : proposez un pion pour attaquer le centre noir.",s:"Voilà le gambit dame.",a:['r:c4d5']},
-          {m:'e7e6',s:"Les Noirs refusent le gambit et soutiennent d5. C'est le gambit dame refusé.",a:['g:e6d5']},
-          {m:'b1c3',s:"Pression sur d5.",a:['r:c3d5']},
-          {m:'g8f6',s:"Défense de d5."},
-          {m:'c1g5',s:"Le fou cloue le cavalier sur la dame.",a:['r:g5f6','r:f6d8']},
-          {m:'f8e7',s:"Les Noirs déclouent."},
-          {m:'e2e3',s:"Les Blancs ouvrent la route au fou f1."},
-          {m:'e8g8',s:""},{m:'g1f3',s:""},{m:'b8d7',s:""},
-          {m:'a1c1',s:"La tour se place sur la colonne c, qui va s'ouvrir."},
-          {m:'c7c6',s:"Les Noirs consolident d5."},
-          {m:'f1d3',s:""},
-          {m:'d5c4',s:"Les Noirs prennent quand le fou a déjà bougé : ils gagnent un temps."},
-          {m:'d3c4',s:"Les Blancs ont un peu plus d'espace. Les Noirs vont chercher à se libérer avec e5 ou c5.",a:['b:e6e5','b:c6c5']}]},
-          {id:'londres',mod:'Les ouvertures',t:'Le système de Londres',
-          intro:`<p>Un <b>système</b> : les Blancs jouent presque toujours les mêmes coups, quelle que soit la réponse noire. Parfait pour débuter avec les Blancs.</p><p class="mut">1.d4, 2.Ff4, 3.e3, 4.Cf3, 5.c3</p>`,
-          steps:[
-          {m:'d2d4',s:""},{m:'d7d5',s:""},
-          {q:'c1f4',p:"À vous : sortez le fou de la dame tout de suite, avant de jouer e3.",s:"La clé du système : le fou sort avant que e3 ne lui ferme la porte.",a:['b:f4b8']},
-          {m:'g8f6',s:""},
-          {m:'e2e3',s:"Les Blancs forment leur triangle de pions."},
-          {m:'e7e6',s:""},{m:'g1f3',s:""},
-          {m:'c7c5',s:"Les Noirs attaquent d4.",a:['r:c5d4']},
-          {q:'c2c3',p:"À vous : soutenez d4 avec un pion.",s:"Le triangle c3, d4, e3 est très solide.",h:['c3','d4','e3']},
-          {m:'b8c6',s:""},
-          {m:'b1d2',s:"Le cavalier va en d2 pour ne pas gêner le pion c."},
-          {m:'f8d6',s:"Les Noirs proposent l'échange de fous.",a:['r:d6f4']},
-          {m:'f4g3',s:"Le fou recule et garde sa diagonale."},
-          {m:'e8g8',s:""},
-          {m:'f1d3',s:"Schéma harmonieux. Prochaine étape : roquer, puis cavalier en e5 ou poussée e4."}]},
-          {id:'indienneroi',mod:'Les ouvertures',t:'La défense indienne du roi',
-          intro:`<p>Les Noirs laissent les Blancs prendre le centre… pour mieux l'attaquer ensuite. Ouverture d'<b>attaque</b> sur le roi.</p><p class="mut">1.d4 Cf6 2.c4 g6</p>`,
-          steps:[
-          {m:'d2d4',s:""},{m:'g8f6',s:"Les Noirs développent sans occuper le centre."},
-          {m:'c2c4',s:""},{m:'g7g6',s:"Préparation du fianchetto : le fou ira en g7."},
-          {m:'b1c3',s:""},{m:'f8g7',s:"Le fou en g7 vise le centre sur la grande diagonale.",a:['g:g7d4']},
-          {m:'e2e4',s:"Les Blancs prennent tout le centre."},
-          {m:'d7d6',s:"Les Noirs laissent faire et préparent e5."},
-          {m:'g1f3',s:""},{m:'e8g8',s:"Le roi est en sécurité."},
-          {m:'f1e2',s:""},
-          {q:'e7e5',p:"À vous avec les Noirs : frappez enfin au centre.",s:"Les Noirs contestent le centre."},
-          {m:'e1g1',s:""},{m:'b8c6',s:"Pression sur d4."},
-          {m:'d4d5',s:"Les Blancs ferment le centre."},
-          {m:'c6e7',s:"Plan typique : les Noirs attaquent à l'aile roi avec f5, les Blancs à l'aile dame avec c5.",a:['b:f7f5','b:c4c5']}]},
-          {id:'scandinave',mod:'Les ouvertures',t:'La défense scandinave',
-          intro:`<p>Les Noirs attaquent e4 dès le premier coup. Simple, mais la dame noire sort tôt.</p><p class="mut">1.e4 d5</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'d7d5',s:"Attaque immédiate du pion e4."},
-          {m:'e4d5',s:""},{m:'d8d5',s:"La dame reprend, mais elle est exposée au centre."},
-          {q:'b1c3',p:"À vous : développez une pièce en attaquant la dame.",s:"Développement avec gain de temps : la dame doit fuir.",a:['r:c3d5']},
-          {m:'d5a5',s:"La dame se met en a5, d'où elle cloue parfois le cavalier.",a:['r:a5c3']},
-          {m:'d2d4',s:""},{m:'g8f6',s:""},{m:'g1f3',s:""},
-          {m:'c7c6',s:"Les Noirs donnent une case de retraite à leur dame en c7."},
-          {m:'f1c4',s:""},{m:'c8f5',s:"Le fou sort avant e6."},
-          {m:'c1d2',s:"Le fou défend c3 et prépare cavalier d5, qui découvrirait une attaque sur la dame.",a:['b:c3d5']},
-          {m:'e7e6',s:"Position solide pour les Noirs, mais les Blancs ont une petite avance de développement."}]},
-          {id:'anglaise',mod:'Les ouvertures',t:'L’ouverture anglaise',
-          intro:`<p>Les Blancs contrôlent la case d5 par le côté, avec le pion c. Jeu souple et positionnel.</p><p class="mut">1.c4</p>`,
-          steps:[
-          {m:'c2c4',s:"L'anglaise contrôle d5.",a:['g:c4d5']},
-          {m:'e7e5',s:"Les Noirs prennent le centre. C'est comme une Sicilienne inversée."},
-          {m:'b1c3',s:""},{m:'g8f6',s:""},
-          {m:'g2g3',s:"Préparation du fianchetto."},
-          {m:'d7d5',s:""},{m:'c4d5',s:""},{m:'f6d5',s:""},
-          {m:'f1g2',s:"Le fou en g2 vise d5 et toute la grande diagonale.",a:['r:g2d5']},
-          {m:'d5b6',s:"Le cavalier quitte la diagonale dangereuse."},
-          {m:'g1f3',s:"Attaque du pion e5.",a:['r:f3e5']},
-          {m:'b8c6',s:""},{m:'e1g1',s:""},
-          {m:'f8e7',s:"Les Blancs vont jouer à l'aile dame avec a3 et b4.",a:['b:a2a3','b:b2b4']}]},
-
-          /* ================= LES STRATÉGIES ================= */
-          {id:'grec',mod:'Les stratégies',t:'Attaque sur le roi : le sacrifice grec',fen:'r1b2rk1/ppqn1ppp/2n1p3/3pP3/3P4/2NB1N2/PPP2PPP/R1BQ1RK1 w - - 0 10',
-          intro:`<p>Stratégie d'<b>attaque</b>. Quand le roi a roqué et qu'aucun cavalier n'est en f6 pour défendre h7, le sacrifice du fou en h7 est souvent gagnant.</p><p>Conditions : un fou sur la diagonale de h7, un cavalier pour g5, la dame prête à venir en h5.</p>`,h:['h7'],a:['r:d3h7','b:f3g5','b:d1h5'],
-          steps:[
-          {q:'d3h7',p:"Sacrifiez le fou sur le pion qui protège le roi.",s:"Le sacrifice grec ! Le fou prend h7 avec échec."},
-          {m:'g8h7',s:"Le roi prend le fou."},
-          {m:'f3g5',s:"Le cavalier arrive en g5 avec échec, et prépare l'arrivée de la dame.",a:['b:d1h5']},
-          {m:'h7g8',s:"Le roi recule. S'il va en g6, la dame vient en g4 ou d3 avec une attaque terrible."},
-          {m:'d1h5',s:"La dame menace mat en h7. Les Noirs ne peuvent plus se défendre correctement.",a:['r:h5h7','r:g5h7']}]},
-          {id:'avantposte',mod:'Les stratégies',t:'Jeu positionnel : l’avant-poste',fen:'4r1k1/pp3ppp/3p4/4p3/4P3/5N2/PPP2PPP/3R2K1 w - - 0 1',
-          intro:`<p>Stratégie <b>positionnelle</b>. La case d5 est un « trou » : aucun pion noir ne pourra jamais l'attaquer. Un cavalier installé là sera intouchable.</p>`,h:['d5'],
-          steps:[
-          {m:'f3d2',s:"Le cavalier commence son voyage vers d5.",a:['b:d2c4','b:c4e3','b:e3d5']},
-          {m:'h7h6',s:"Les Noirs attendent."},
-          {m:'d2c4',s:"En c4, il attaque déjà le pion d6.",a:['r:c4d6']},
-          {m:'g7g5',s:"Les Noirs n'ont rien contre ce plan."},
-          {m:'c4e3',s:"Le cavalier se rapproche de son but."},
-          {m:'g8g7',s:""},
-          {q:'e3d5',p:"À vous : installez le cavalier sur son avant-poste.",s:"Le cavalier en d5 domine l'échiquier. Aucun pion ne pourra jamais le chasser.",h:['d5']}]},
-          {id:'colonnes',mod:'Les stratégies',t:'Colonnes ouvertes et 7e rangée',fen:'4r1k1/pp3ppp/2p5/8/8/2P5/PP3PPP/R4RK1 w - - 0 1',
-          intro:`<p>La colonne d n'a plus de pions : c'est une <b>colonne ouverte</b>, l'autoroute des tours. La tour qui l'occupe en premier pénètre ensuite sur la 7e rangée.</p>`,h:['d1','d2','d3','d4','d5','d6','d7','d8'],
-          steps:[
-          {q:'a1d1',p:"À vous : placez une tour sur la colonne ouverte.",s:"La tour contrôle maintenant toute la colonne d."},
-          {m:'g8f8',s:"Le roi noir se rapproche pour défendre."},
-          {m:'d1d7',s:"La tour pénètre sur la 7e rangée et attaque b7.",a:['r:d7b7']},
-          {m:'e8e7',s:"Les Noirs proposent l'échange de tours."},
-          {q:'f1d1',p:"À vous : renforcez la tour d7 avec l'autre tour.",s:"Les tours sont doublées. Si les Noirs échangent, l'autre tour reprend et reste active."},
-          {m:'e7d7',s:""},{m:'d1d7',s:"La tour reprend et reste sur la 7e rangée."},
-          {m:'f8e8',s:""},
-          {m:'d7b7',s:"La tour gagne le pion b7. Une tour sur la 7e rangée vaut souvent un pion de plus."}]},
-          {id:'majorite',mod:'Les stratégies',t:'Majorité de pions et pion passé',fen:'6k1/pp3ppp/8/8/8/8/PPP2PPP/6K1 w - - 0 1',
-          intro:`<p>Les Blancs ont 3 pions contre 2 à l'aile dame : c'est une <b>majorité</b>. Le plan : avancer ensemble pour créer un <b>pion passé</b>, un pion qu'aucun pion adverse ne peut arrêter.</p>`,h:['a2','b2','c2'],
-          steps:[
-          {m:'c2c4',s:"Le pion sans adversaire en face avance le premier."},
-          {m:'h7h6',s:""},
-          {m:'b2b4',s:"Les pions avancent ensemble, en se soutenant."},
-          {m:'g7g5',s:""},{m:'c4c5',s:""},{m:'f7f5',s:""},
-          {m:'b4b5',s:"Les pions arrivent au contact."},
-          {m:'g8f7',s:""},
-          {q:'c5c6',p:"À vous : poussez le pion pour forcer la création d'un pion passé.",s:"Le pion attaque b7."},
-          {m:'b7c6',s:"Les Noirs prennent."},
-          {m:'b5c6',s:"Un pion passé en c6 ! Seul le roi noir pourrait l'arrêter, et il est trop loin. Les pions passés doivent avancer !",h:['c6']}]},
-          {id:'isole',mod:'Les stratégies',t:'Jouer contre le pion isolé',fen:'r1bq1rk1/pp2bppp/2n2n2/3p4/8/2N1PN2/PP2BPPP/R2Q1RK1 w - - 0 10',
-          intro:`<p>Le pion d5 noir est <b>isolé</b> : aucun pion noir sur les colonnes c et e pour le défendre. Le plan : le bloquer, puis l'attaquer avec les pièces.</p>`,h:['d5'],
-          steps:[
-          {q:'f3d4',p:"À vous : placez un cavalier juste devant le pion isolé.",s:"La case d4 est parfaite : aucun pion noir ne peut chasser le cavalier. On bloque d'abord, on attaque ensuite.",h:['d4']},
-          {m:'f8e8',s:"Les Noirs activent leur tour."},
-          {m:'e2f3',s:"Le fou attaque d5.",a:['r:f3d5']},
-          {m:'c8e6',s:"Les Noirs défendent d5."},
-          {m:'d1b3',s:"La dame attaque b7 et ajoute de la pression.",a:['r:b3b7']},
-          {m:'d8d7',s:""},
-          {m:'f1d1',s:"La tour se place derrière le cavalier. Les Noirs vont passer la partie à défendre leur pion faible."}]},
-          {id:'minorite',mod:'Les stratégies',t:'L’attaque de minorité',fen:'r4rk1/pp3ppp/2p5/3p4/3P4/4P3/PP3PPP/R4RK1 w - - 0 1',
-          intro:`<p>Structure typique du gambit dame. Les Blancs ont 2 pions contre 3 à l'aile dame, et pourtant ils attaquent avec cette <b>minorité</b> pour créer une faiblesse dans le camp noir.</p>`,h:['a2','b2','a7','b7','c6'],
-          steps:[
-          {m:'b2b4',s:"Le pion b part à l'attaque.",a:['b:b4b5']},
-          {m:'a7a6',s:""},
-          {m:'a2a4',s:"Le pion a soutient l'avance."},
-          {m:'g7g6',s:""},
-          {m:'b4b5',s:"Le contact !"},
-          {m:'a6b5',s:""},{m:'a4b5',s:""},{m:'g8g7',s:""},
-          {q:'b5c6',p:"À vous : prenez pour casser la structure noire.",s:"Après la reprise, le pion noir en c6 sera faible."},
-          {m:'b7c6',s:""},
-          {m:'f1c1',s:"La tour attaque le pion faible c6. Les Noirs devront le défendre très longtemps.",a:['r:c1c6'],h:['c6']}]},
-          {id:'roquesopp',mod:'Les stratégies',t:'Roques opposés : la course à l’attaque',pre:['e2e4','c7c5','g1f3','d7d6','d2d4','c5d4','f3d4','g8f6','b1c3','a7a6','c1e3','e7e5','d4b3','c8e6','f2f3'],
-          intro:`<p>Quand les rois sont de <b>côtés opposés</b>, chaque camp peut lancer ses pions vers le roi adverse sans affaiblir le sien. C'est une course : la vitesse compte plus que le matériel.</p>`,
-          steps:[
-          {m:'f8e7',s:"Les Noirs se développent."},
-          {m:'d1d2',s:"La dame se prépare au grand roque."},
-          {m:'e8g8',s:"Les Noirs roquent côté roi."},
-          {q:'e1c1',p:"À vous : roquez du côté opposé, à l'aile dame.",s:"Grand roque ! Les rois sont maintenant de côtés opposés."},
-          {m:'b8d7',s:""},
-          {m:'g2g4',s:"Les Blancs lancent l'avalanche de pions vers le roi noir.",a:['b:g4g5','b:h2h4']},
-          {m:'b7b5',s:"Les Noirs font de même vers le roi blanc.",a:['b:b5b4','b:a6a5']},
-          {m:'g4g5',s:"Le pion chasse le cavalier qui défend le roi.",a:['r:g5f6']},
-          {m:'b5b4',s:"Les Noirs chassent le cavalier c3. Le premier qui ouvre une colonne vers le roi adverse gagne souvent.",a:['r:b4c3']}]},
-          {id:'prophylaxie',mod:'Les stratégies',t:'La prophylaxie',pre:['e2e4','e7e5','g1f3','b8c6','f1c4','f8c5','c2c3','g8f6','d2d3','d7d6'],
-          intro:`<p>La prophylaxie, c'est <b>empêcher le plan adverse</b> avant qu'il n'arrive. Avant chaque coup, demandez-vous : que veut faire mon adversaire ?</p>`,a:['r:c8g4'],
-          steps:[
-          {q:'h2h3',p:"Les Noirs aimeraient mettre leur fou en g4 pour clouer le cavalier. Empêchez-le avec un pion.",s:"Le petit coup h3 enlève la case g4 au fou, et donne une case de sortie au roi après le roque.",a:['r:h3g4']},
-          {m:'a7a6',s:"Les Noirs aussi pensent prophylaxie : ils préparent une retraite en a7 pour leur fou, au cas où les Blancs joueraient b4 ou d4.",a:['b:c5a7']},
-          {m:'e1g1',s:""},
-          {m:'c5a7',s:"Le fou se met à l'abri à l'avance. Deux joueurs qui pensent aux plans de l'adversaire !"}]},
-          {id:'fous',mod:'Les stratégies',t:'Bon fou et mauvais fou',fen:'4k3/pp3ppp/4p3/3pP3/3P4/8/PP3PPP/2B1K3 w - - 0 1',
-          intro:`<p>Un fou est <b>mauvais</b> quand ses propres pions sont bloqués sur des cases de sa couleur. Ici le fou c1 circule sur les cases foncées, comme les pions d4 et e5 : il a peu d'avenir.</p><ul><li>Placez vos pions sur la couleur <b>opposée</b> à celle de votre fou.</li><li>Échangez votre mauvais fou, ou sortez-le devant la chaîne de pions avant de la fermer.</li></ul>`,h:['c1','d4','e5'],
-          steps:[
-          {m:'c1g5',s:"Le fou sort devant ses pions : il devient actif.",a:['b:g5d8']},
-          {m:'f7f6',s:"Les Noirs attaquent le fou et la chaîne."},
-          {m:'e5f6',s:""},{m:'g7f6',s:""},
-          {m:'g5f6',s:"Le fou blanc n'était plus enfermé : il a gagné un pion. Un fou devant ses pions vaut bien plus qu'un fou derrière."}]},
-          {id:'plan',mod:'Les stratégies',t:'Comment faire un plan',fen:'r1bq1rk1/pp2bppp/2n1pn2/3p4/2PP4/2N1PN2/PP3PPP/R2QKB1R w KQ - 0 8',
-          intro:`<p>Un mauvais plan vaut mieux que pas de plan du tout. Observez la position en 4 questions :</p><ul><li><b>1. Matériel</b> : qui a plus de pièces ?</li><li><b>2. Sécurité des rois</b> : un roi est-il exposé ? Attaquez-le.</li><li><b>3. Structure de pions</b> : quelles faiblesses viser ?</li><li><b>4. Pièce la plus mal placée</b> : améliorez votre pire pièce.</li></ul><p>Règle d'or : <b>attaquez du côté où vous avez plus d'espace</b>.</p>`,
-          steps:[
-          {s:"Ici, le roi blanc n'a pas encore roqué : c'est la priorité. Et le fou f1 n'est pas sorti.",a:['b:f1d3','b:e1g1']},
-          {q:'f1d3',p:"À vous : développez votre pièce la plus mal placée.",s:"Le fou sort et prépare le roque."},
-          {m:'d5c4',s:"Les Noirs prennent le pion."},
-          {m:'d3c4',s:"Le fou reprend. Maintenant, roquer."},
-          {m:'a7a6',s:""},
-          {q:'e1g1',p:"Mettez le roi à l'abri.",s:"Les Blancs ont fini leur développement. Prochaine étape : centraliser les tours."}]},
-
-          /* ================= LA TACTIQUE ================= */
-          {id:'fourchette',mod:'La tactique',t:'La fourchette du cavalier',fen:'r3k3/8/8/1N6/8/8/8/4K3 w - - 0 1',
-          intro:`<p>Une <b>fourchette</b> : une pièce attaque deux cibles en même temps. Le cavalier est le roi des fourchettes, car il saute par-dessus les pièces.</p>`,
-          steps:[
-          {q:'b5c7',p:"Trouvez le coup de cavalier qui attaque le roi et la tour.",s:"Échec et attaque de la tour : c'est une fourchette !",a:['r:c7e8','r:c7a8']},
-          {m:'e8d7',s:"Le roi doit s'occuper de l'échec."},
-          {m:'c7a8',s:"Le cavalier ramasse la tour."}]},
-          {id:'fourchettepion',mod:'La tactique',t:'La fourchette de pion',fen:'6k1/8/2n1r3/8/3P4/8/8/6K1 w - - 0 1',
-          intro:`<p>Même un simple pion peut faire une fourchette. Et un pion qui gagne une pièce, c'est une excellente affaire !</p>`,
-          steps:[
-          {q:'d4d5',p:"Trouvez la poussée de pion qui attaque deux pièces.",s:"Le pion attaque le cavalier et la tour.",a:['r:d5c6','r:d5e6']},
-          {m:'e6e5',s:"La tour s'enfuit…"},
-          {m:'d5c6',s:"…et le pion prend le cavalier."}]},
-          {id:'clouage',mod:'La tactique',t:'Le clouage',fen:'6k1/5qpp/8/8/8/1P6/6PP/5BK1 w - - 0 1',
-          intro:`<p>Une pièce <b>clouée</b> ne peut pas bouger, car elle protège une pièce plus précieuse derrière elle. Quand c'est le roi derrière, elle ne peut pas bouger du tout.</p>`,
-          steps:[
-          {q:'f1c4',p:"Clouez la dame noire sur son roi.",s:"La dame est clouée : si elle quittait la diagonale, le roi serait en échec.",a:['r:c4f7','r:f7g8']},
-          {m:'f7c4',s:"Les Noirs limitent les dégâts en prenant le fou."},
-          {m:'b3c4',s:"Le pion reprend : les Blancs ont gagné la dame contre un fou."}]},
-          {id:'enfilade',mod:'La tactique',t:'L’enfilade',fen:'7q/8/8/4k3/8/8/3B4/6K1 w - - 0 1',
-          intro:`<p>L'<b>enfilade</b> est l'inverse du clouage : la pièce précieuse est devant. Elle doit s'écarter, et la pièce cachée derrière tombe.</p>`,
-          steps:[
-          {q:'d2c3',p:"Le roi et la dame noirs sont sur la même diagonale. Donnez échec avec le fou.",s:"Échec ! Le roi doit quitter la diagonale.",a:['r:c3e5','r:e5h8']},
-          {m:'e5e6',s:"Le roi s'écarte."},
-          {m:'c3h8',s:"Le fou prend la dame cachée derrière."}]},
-          {id:'decouverte',mod:'La tactique',t:'L’attaque à la découverte',fen:'4k3/8/8/8/q3N3/8/8/4R1K1 w - - 0 1',
-          intro:`<p>Une pièce bouge et <b>démasque</b> l'attaque d'une autre pièce placée derrière elle. On obtient deux menaces d'un seul coup.</p>`,a:['b:e1e8'],
-          steps:[
-          {q:'e4c5',p:"Le cavalier masque la tour e1. Bougez-le pour donner échec avec la tour, tout en attaquant la dame.",s:"La tour donne échec, et le cavalier attaque la dame.",a:['r:e1e8','r:c5a4']},
-          {m:'e8d8',s:"Le roi doit parer l'échec."},
-          {m:'c5a4',s:"Le cavalier prend la dame."}]},
-          {id:'doubleechec',mod:'La tactique',t:'Le double échec',fen:'2q1k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1',
-          intro:`<p>Le <b>double échec</b> est la découverte la plus puissante : deux pièces donnent échec en même temps. On ne peut ni prendre les deux ni s'interposer : seul le roi peut bouger.</p>`,
-          steps:[
-          {q:'e4d6',p:"Trouvez le double échec, qui attaque aussi la dame.",s:"Double échec ! Et le cavalier attaque aussi la dame.",a:['r:d6e8','r:e1e8','r:d6c8']},
-          {m:'e8d8',s:"Seul le roi peut bouger."},
-          {m:'d6c8',s:"Le cavalier prend la dame."},
-          {m:'d8c8',s:"Le roi reprend le cavalier, mais les Blancs ont gagné une dame contre un cavalier."}]},
-          {id:'eliminer',mod:'La tactique',t:'Éliminer le défenseur',fen:'3r2k1/4qppp/8/8/8/8/3Q1PPP/3R2K1 w - - 0 1',
-          intro:`<p>Quand une seule pièce défend un point important, <b>éliminez-la</b>, même au prix d'un sacrifice. Ici, la tour d8 garde la dernière rangée.</p>`,h:['d8'],
-          steps:[
-          {q:'d2d8',p:"Sacrifiez la dame pour détruire la défense.",s:"Échec ! Les Noirs sont obligés de reprendre avec la dame."},
-          {m:'e7d8',s:"La dame noire reprend."},
-          {q:'d1d8',p:"À vous : finissez la partie.",s:"Échec et mat ! Le roi est prisonnier de ses propres pions."}]},
-          {id:'doubleattaque',mod:'La tactique',t:'La double attaque de la dame',fen:'r5k1/6pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',
-          intro:`<p>La dame bouge dans toutes les directions : c'est la meilleure pièce pour attaquer deux cibles à la fois.</p>`,
-          steps:[
-          {q:'d1d5',p:"Trouvez la case d'où la dame attaque le roi et la tour.",s:"Échec au roi et attaque de la tour.",a:['r:d5g8','r:d5a8']},
-          {m:'g8f8',s:"Le roi s'écarte."},
-          {m:'d5a8',s:"La dame prend la tour avec échec."}]},
-
-          /* ================= LES MATS ================= */
-          {id:'couloir',mod:'Les mats',t:'Le mat du couloir',fen:'6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1',
-          intro:`<p>Le roi est enfermé derrière ses propres pions. Une tour ou une dame sur la dernière rangée suffit pour le mater.</p><p>Prévention : faites une « fenêtre » pour votre roi avec h3 ou g3 au bon moment.</p>`,
-          steps:[{q:'d1d8',p:"Donnez le mat du couloir.",s:"Échec et mat ! Les pions f7, g7 et h7 empêchent le roi de fuir."}]},
-          {id:'legal',mod:'Les mats',t:'Le mat de Légal (piège célèbre)',
-          intro:`<p>Un piège vieux de 270 ans. Les Blancs offrent leur dame… et matent avec trois pièces mineures.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},{m:'g1f3',s:""},
-          {m:'d7d6',s:"La défense Philidor."},
-          {m:'f1c4',s:"Le fou vise f7.",a:['r:c4f7']},
-          {m:'c8g4',s:"Le fou cloue le cavalier sur la dame.",a:['r:g4f3','r:f3d1']},
-          {m:'b1c3',s:"Les Blancs développent tranquillement."},
-          {m:'g7g6',s:"Les Noirs jouent un coup inutile."},
-          {q:'f3e5',p:"À vous : prenez le pion e5, même si votre dame semble perdue !",s:"Le cavalier prend e5 et laisse la dame en prise : c'est le piège !",a:['r:g4d1']},
-          {m:'g4d1',s:"Les Noirs prennent la dame. Grave erreur !"},
-          {q:'c4f7',p:"Donnez échec avec le fou.",s:"Échec ! Le fou est protégé par le cavalier e5."},
-          {m:'e8e7',s:"Le roi n'a qu'une seule case."},
-          {q:'c3d5',p:"Donnez le mat avec un cavalier.",s:"Échec et mat ! Trois pièces mineures ont battu la dame. Leçon : vérifiez toujours avant de prendre."}]},
-          {id:'etouffe',mod:'Les mats',t:'Le mat à l’étouffée',fen:'5r1k/6pp/8/6N1/2Q5/8/5PPP/6K1 w - - 0 1',
-          intro:`<p>Le <b>mat de Philidor</b> : un cavalier mate un roi étouffé par ses propres pièces. L'une des plus belles combinaisons du jeu.</p>`,
-          steps:[
-          {q:'g5f7',p:"Commencez par un échec du cavalier.",s:"Échec !"},
-          {m:'h8g8',s:"Le roi va en g8."},
-          {q:'f7h6',p:"Trouvez le double échec !",s:"Double échec du cavalier et de la dame.",a:['r:h6g8','r:c4g8']},
-          {m:'g8h8',s:"Le roi retourne dans le coin."},
-          {q:'c4g8',p:"Le sacrifice incroyable : offrez la dame !",s:"La dame se sacrifie en g8. Seule la tour peut la prendre."},
-          {m:'f8g8',s:"La tour prend… et enferme son propre roi."},
-          {q:'h6f7',p:"Donnez le mat !",s:"Le mat à l'étouffée ! Le roi est entouré de ses propres pièces."}]},
-          {id:'escalier',mod:'Les mats',t:'Le mat de l’escalier',fen:'8/8/8/8/5k2/1R6/8/R6K w - - 0 1',
-          intro:`<p>Avec deux tours, on pousse le roi vers le bord : une tour bloque une rangée, l'autre donne échec sur la rangée suivante. Elles avancent comme sur un escalier.</p>`,
-          steps:[
-          {m:'a1a4',s:"Échec sur la 4e rangée. L'autre tour bloque déjà la 3e."},
-          {m:'f4f5',s:"Le roi doit monter."},
-          {q:'b3b5',p:"À vous : l'autre tour donne échec une rangée plus haut.",s:"Le roi doit encore monter."},
-          {m:'f5f6',s:""},{m:'a4a6',s:""},{m:'f6f7',s:""},{m:'b5b7',s:""},{m:'f7f8',s:""},
-          {q:'a6a8',p:"Le dernier pas de l'escalier !",s:"Échec et mat ! Les tours se sont relayées rangée par rangée."}]},
-          {id:'dameroi',mod:'Les mats',t:'Mat avec la dame (attention au pat)',fen:'7k/8/5K2/8/8/8/8/6Q1 w - - 0 1',
-          intro:`<p>Le roi noir est dans le coin. Il faut donner mat… sans faire <b>pat</b> ! Le pat, c'est quand le roi n'est pas en échec mais n'a plus aucun coup : la partie est nulle.</p>`,
-          steps:[
-          {s:"Attention : si la dame va en g6, le roi noir n'a plus de coup mais n'est pas en échec. C'est pat, partie nulle !",a:['r:g1g6']},
-          {q:'g1g7',p:"Donnez le mat en un coup.",s:"Mat ! La dame est protégée par le roi blanc."}]},
-
-          /* ================= LES FINALES ================= */
-          {id:'opposition',mod:'Les finales',t:'Roi et pion : l’opposition',fen:'4k3/8/4K3/4P3/8/8/8/8 w - - 0 1',
-          intro:`<p>Deux rois face à face avec une case vide entre eux sont en <b>opposition</b>. En finale, le roi est une pièce d'attaque : il doit marcher devant son pion.</p>`,
-          steps:[
-          {m:'e6d6',s:"Le roi blanc se place à côté, en contrôlant les cases devant le pion."},
-          {m:'e8d8',s:"Le roi noir prend l'opposition."},
-          {q:'e5e6',p:"À vous : avancez le pion, le roi le protège.",s:"Le pion avance sous la protection du roi."},
-          {m:'d8e8',s:""},
-          {q:'e6e7',p:"Encore une poussée !",s:"Le roi noir doit quitter la case de promotion."},
-          {m:'e8f7',s:""},
-          {m:'d6d7',s:"Le roi blanc contrôle la case e8."},
-          {m:'f7f6',s:""},
-          {q:'e7e8q',p:"Promouvez le pion en dame !",s:"Une nouvelle dame ! Règle : quand votre roi est devant le pion, sur la 6e rangée, c'est gagné."}]},
-          {id:'carre',mod:'Les finales',t:'La règle du carré',fen:'8/8/8/8/P7/8/5k2/K7 w - - 0 1',
-          intro:`<p>Tracez un carré du pion jusqu'à la 8e rangée : a4, a8, e8, e4. Si le roi adverse ne peut pas entrer dans ce carré, il ne rattrapera <b>jamais</b> le pion.</p>`,h:['a4','a8','e8','e4'],
-          steps:[
-          {m:'a4a5',s:"Le carré se réduit."},
-          {m:'f2e3',s:"Le roi noir court…"},
-          {m:'a5a6',s:""},{m:'e3d4',s:""},{m:'a6a7',s:""},
-          {m:'d4c5',s:"Trop tard !"},
-          {q:'a7a8q',p:"Promouvez !",s:"Le roi noir n'était pas dans le carré : le pion a gagné la course."}]},
-          {id:'lucena',mod:'Les finales',t:'Finale de tours : Lucena',fen:'1K6/1P2k3/8/8/8/8/2r5/3R4 w - - 0 1',
-          intro:`<p>La position de <b>Lucena</b>, la plus importante des finales de tours. Le roi blanc est enfermé devant son pion. La technique s'appelle « construire un pont ».</p>`,
-          steps:[
-          {q:'d1d4',p:"Placez la tour sur la 4e rangée : elle servira de bouclier.",s:"La tour en d4 bloquera les échecs plus tard."},
-          {m:'c2c1',s:"Les Noirs attendent."},
-          {m:'b8a7',s:"Le roi sort de sa cachette."},
-          {m:'c1a1',s:"Échec."},{m:'a7b6',s:""},
-          {m:'a1b1',s:"Échec."},{m:'b6c6',s:"Le roi avance vers la tour."},
-          {m:'b1c1',s:"Échec encore."},{m:'c6b5',s:""},
-          {m:'c1b1',s:"Dernier échec."},
-          {q:'d4b4',p:"Construisez le pont !",s:"La tour bloque l'échec. Le pion va se promouvoir : c'est gagné."}]},
-          {id:'philidor',mod:'Les finales',t:'Finale de tours : Philidor',fen:'4k3/8/r7/3PK3/8/8/8/7R b - - 0 1',
-          intro:`<p>La défense de <b>Philidor</b> permet d'annuler avec un pion de moins. La tour noire garde sa 6e rangée, puis passe derrière dès que le pion avance.</p>`,
-          steps:[
-          {m:'a6b6',s:"La tour reste sur la 6e rangée : le roi blanc ne peut pas avancer.",h:['b6','e6']},
-          {m:'h1h7',s:"Les Blancs essaient d'enfermer le roi."},
-          {m:'b6a6',s:"Les Noirs attendent sur la 6e rangée."},
-          {m:'d5d6',s:"Le pion avance : il ne protège plus le roi blanc des échecs."},
-          {q:'a6a1',p:"À vous avec les Noirs : la tour part derrière pour donner des échecs.",s:"La tour va maintenant harceler le roi blanc."},
-          {m:'e5e6',s:""},
-          {m:'a1e1',s:"Échec ! Les échecs sont infinis : c'est nul."}]},
-
-          /* ================= PARTIE CÉLÈBRE ================= */
-          {id:'morphy',mod:'Parties célèbres',t:'Morphy : la partie de l’Opéra (1858)',
-          intro:`<p>Paris, 1858, pendant un opéra. Paul Morphy joue contre le duc de Brunswick et le comte Isouard. Une leçon parfaite de <b>développement</b> et de <b>sacrifices</b>.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},{m:'g1f3',s:""},
-          {m:'d7d6',s:"La défense Philidor, un peu passive."},
-          {m:'d2d4',s:"Morphy ouvre le jeu."},
-          {m:'c8g4',s:"Le fou cloue le cavalier."},
-          {m:'d4e5',s:""},
-          {m:'g4f3',s:"Les Noirs donnent leur fou pour ne pas perdre de pion."},
-          {m:'d1f3',s:"La dame reprend et se développe."},
-          {m:'d6e5',s:""},
-          {m:'f1c4',s:"Menace de mat en f7 !",a:['r:c4f7','r:f3f7']},
-          {m:'g8f6',s:"Le cavalier défend."},
-          {m:'f3b3',s:"Double attaque sur f7 et b7.",a:['r:b3b7','r:c4f7']},
-          {m:'d8e7',s:"La dame défend f7."},
-          {m:'b1c3',s:"Morphy préfère se développer plutôt que prendre b7. Le développement d'abord !"},
-          {m:'c7c6',s:""},
-          {m:'c1g5',s:"Le cavalier f6 est cloué.",a:['r:g5f6']},
-          {m:'b7b5',s:"Les Noirs attaquent le fou c4."},
-          {q:'c3b5',p:"Jouez comme Morphy : sacrifiez le cavalier pour ouvrir les lignes.",s:"Un sacrifice ! Morphy donne une pièce pour ouvrir le jeu vers le roi noir."},
-          {m:'c6b5',s:""},
-          {m:'c4b5',s:"Échec, et le cavalier qui viendra en d7 sera cloué."},
-          {m:'b8d7',s:""},
-          {m:'e1c1',s:"Grand roque : la tour arrive sur la colonne d.",a:['r:d1d7']},
-          {m:'a8d8',s:""},
-          {q:'d1d7',p:"Sacrifiez la tour sur d7 !",s:"Encore un sacrifice pour éliminer un défenseur."},
-          {m:'d8d7',s:""},
-          {m:'h1d1',s:"La deuxième tour vient renforcer la pression."},
-          {m:'e7e6',s:"Les Noirs déclouent le cavalier f6."},
-          {m:'b5d7',s:""},{m:'f6d7',s:""},
-          {q:'b3b8',p:"Le coup final : sacrifiez la dame !",s:"Le sacrifice de dame !"},
-          {m:'d7b8',s:"Le cavalier prend la dame…"},
-          {q:'d1d8',p:"Donnez le mat.",s:"Échec et mat ! Morphy a utilisé toutes ses pièces. L'une des parties les plus célèbres de l'histoire."}]}
-          ];
-
-          LESSONS.push(
-          {id:'sot',mod:'Pièges',t:'Le mat du sot (2 coups)',
-          intro:`<p>Le mat le plus rapide possible. Les Blancs affaiblissent la diagonale de leur roi avec deux coups de pions… et sont matés au 2e coup.</p>`,
-          steps:[
-          {m:'f2f3',s:"Mauvais coup : il ouvre la diagonale entre la dame noire et le roi blanc."},
-          {m:'e7e5',s:"Les Noirs libèrent leur dame.",a:['b:d8h4']},
-          {m:'g2g4',s:"Deuxième erreur : la diagonale est maintenant grande ouverte.",a:['r:h4e1']},
-          {q:'d8h4',p:"À vous avec les Noirs : donnez le mat en un coup !",s:"Échec et mat en deux coups ! Leçon : ne bougez pas les pions f et g en début de partie."}]},
-          {id:'berger',mod:'Pièges',t:'Le coup du berger',
-          intro:`<p>Le piège le plus connu des débutants : la dame et le fou attaquent ensemble le point <b>f7</b>, défendu seulement par le roi.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},
-          {m:'f1c4',s:"Le fou vise f7.",a:['r:c4f7']},
-          {m:'b8c6',s:""},
-          {m:'d1h5',s:"La dame aussi vise f7. Menace de mat !",a:['r:h5f7','r:c4f7']},
-          {m:'g8f6',s:"Les Noirs attaquent la dame… mais oublient la menace. Il fallait jouer pion g6 ou dame e7."},
-          {q:'h5f7',p:"Punissez l'erreur : donnez le mat.",s:"Échec et mat ! Pour vous défendre, retenez : contre une dame en h5, jouez g6 ou dame e7."}]},
-          {id:'foiefrit',mod:'Pièges',t:'L’attaque du foie frit',
-          intro:`<p>Un piège agressif de la partie des deux cavaliers. Si les Noirs reprennent mal en d5, les Blancs sacrifient un cavalier en f7 et chassent le roi noir au centre.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},{m:'g1f3',s:""},{m:'b8c6',s:""},{m:'f1c4',s:""},
-          {m:'g8f6',s:"La défense des deux cavaliers."},
-          {m:'f3g5',s:"Le cavalier attaque f7 avec le fou.",a:['r:g5f7','r:c4f7']},
-          {m:'d7d5',s:"Les Noirs bloquent la diagonale du fou."},
-          {m:'e4d5',s:""},
-          {m:'f6d5',s:"Erreur ! La bonne défense était cavalier a5, qui attaque le fou."},
-          {q:'g5f7',p:"Sacrifiez le cavalier sur f7 !",s:"Le sacrifice ! Le roi noir va être chassé au centre."},
-          {m:'e8f7',s:"Le roi prend."},
-          {m:'d1f3',s:"Échec, et double attaque sur le cavalier d5.",a:['r:f3d5']},
-          {m:'f7e6',s:"Le roi doit défendre son cavalier lui-même."},
-          {m:'b1c3',s:"Les Blancs ajoutent un attaquant sur d5. Le roi noir est en plein centre : l'attaque blanche est très dangereuse.",a:['r:c3d5']}]},
-          {id:'carokannpiege',mod:'Pièges',t:'Le piège de la Caro-Kann',
-          intro:`<p>Un mat en 6 coups ! Le pion e7 noir est cloué par la dame blanche, et le cavalier blanc saute en d6.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'c7c6',s:""},{m:'d2d4',s:""},{m:'d7d5',s:""},{m:'b1c3',s:""},{m:'d5e4',s:""},{m:'c3e4',s:""},
-          {m:'b8d7',s:"Les Noirs préparent cavalier f6."},
-          {m:'d1e2',s:"Coup piège : la dame se place sur la colonne du roi noir.",a:['r:e2e8']},
-          {m:'g8f6',s:"Erreur naturelle ! Le pion e7 est cloué : il ne pourra pas prendre en d6.",a:['r:e7d6']},
-          {q:'e4d6',p:"Donnez le mat avec le cavalier !",s:"Échec et mat ! Le pion e7 est cloué par la dame et ne peut pas prendre le cavalier."}]},
-          {id:'blackburne',mod:'Pièges',t:'Le piège de Blackburne',
-          intro:`<p>Avec les Noirs. Les Noirs laissent le pion e5 en prise. Si les Blancs le prennent, la dame noire entre en jeu avec une attaque terrible.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},{m:'g1f3',s:""},{m:'b8c6',s:""},{m:'f1c4',s:""},
-          {m:'c6d4',s:"Le coup piège : le pion e5 semble offert.",a:['r:f3e5']},
-          {m:'f3e5',s:"Les Blancs tombent dans le piège et prennent le pion."},
-          {q:'d8g5',p:"À vous avec les Noirs : la dame attaque le cavalier et le pion g2.",s:"Double attaque sur le cavalier e5 et le pion g2.",a:['r:g5g2','r:g5e5']},
-          {m:'e5f7',s:"Les Blancs attaquent la dame et la tour."},
-          {m:'g5g2',s:"La dame prend g2 et attaque la tour h1.",a:['r:g2h1']},
-          {m:'h1f1',s:""},
-          {m:'g2e4',s:"Échec !"},
-          {m:'c4e2',s:"Le fou bloque l'échec, mais il est cloué."},
-          {q:'d4f3',p:"Donnez le mat !",s:"Échec et mat à l'étouffée ! Le fou e2 est cloué et ne peut pas prendre le cavalier."}]},
-          {id:'elephant',mod:'Pièges',t:'Le piège de l’éléphant',
-          intro:`<p>Avec les Noirs dans le gambit dame. Le cavalier d5 semble mal défendu, mais si les Blancs le prennent, ils perdent une pièce.</p>`,
-          steps:[
-          {m:'d2d4',s:""},{m:'d7d5',s:""},{m:'c2c4',s:""},{m:'e7e6',s:""},{m:'b1c3',s:""},{m:'g8f6',s:""},{m:'c1g5',s:""},
-          {m:'b8d7',s:"Le coup piège : le cavalier f6 semble cloué."},
-          {m:'c4d5',s:""},{m:'e6d5',s:""},
-          {m:'c3d5',s:"Les Blancs pensent gagner un pion grâce au clouage."},
-          {q:'f6d5',p:"À vous avec les Noirs : prenez le cavalier, même si votre dame est en prise !",s:"Les Noirs abandonnent leur dame… pour un instant."},
-          {m:'g5d8',s:"Le fou prend la dame."},
-          {q:'f8b4',p:"Donnez échec avec le fou !",s:"Échec ! Les Blancs ne peuvent que bloquer avec la dame."},
-          {m:'d1d2',s:""},{m:'b4d2',s:""},{m:'e1d2',s:""},
-          {m:'e8d8',s:"Le roi reprend le fou. Bilan : les Noirs ont gagné une pièce."}]},
-          {id:'englund',mod:'Pièges',t:'Le piège du gambit Englund',
-          intro:`<p>Avec les Noirs contre 1.d4. Un piège redoutable sur le pion b2, qui se termine par un mat sur la case c1.</p>`,
-          steps:[
-          {m:'d2d4',s:""},{m:'e7e5',s:"Le gambit Englund : un pion offert."},
-          {m:'d4e5',s:""},{m:'b8c6',s:""},{m:'g1f3',s:""},
-          {m:'d8e7',s:"La dame attaque e5 et prépare le piège."},
-          {m:'c1f4',s:"Les Blancs défendent e5… et tombent dans le piège."},
-          {q:'e7b4',p:"À vous : échec, qui attaque aussi le pion b2.",s:"Échec et double attaque sur b2.",a:['r:b4b2']},
-          {m:'f4d2',s:""},{m:'b4b2',s:"La dame prend b2 et attaque la tour a1."},
-          {m:'d2c3',s:"Le fou attaque la dame."},
-          {q:'f8b4',p:"Clouez le fou c3 !",s:"Le fou c3 est cloué sur le roi blanc."},
-          {m:'d1d2',s:""},{m:'b4c3',s:""},{m:'d2c3',s:""},
-          {q:'b2c1',p:"Donnez le mat !",s:"Échec et mat ! Le roi est entouré de ses propres pièces."}]},
-          {id:'noe',mod:'Pièges',t:'L’arche de Noé',
-          intro:`<p>Avec les Noirs dans la partie espagnole. Le fou blanc en b3 se fait enfermer par une chaîne de pions noirs.</p>`,
-          steps:[
-          {m:'e2e4',s:""},{m:'e7e5',s:""},{m:'g1f3',s:""},{m:'b8c6',s:""},{m:'f1b5',s:""},{m:'a7a6',s:""},{m:'b5a4',s:""},{m:'d7d6',s:""},{m:'d2d4',s:""},
-          {m:'b7b5',s:"Les Noirs chassent le fou."},{m:'a4b3',s:""},
-          {m:'c6d4',s:"Les Noirs échangent au centre."},{m:'f3d4',s:""},{m:'e5d4',s:""},
-          {m:'d1d4',s:"Erreur : la dame reprend le pion."},
-          {q:'c7c5',p:"À vous avec les Noirs : attaquez la dame avec un pion.",s:"La dame doit fuir."},
-          {m:'d4d5',s:"La dame attaque la tour a8.",a:['r:d5a8']},
-          {m:'c8e6',s:"Le fou attaque la dame."},
-          {m:'d5c6',s:"Échec."},{m:'e6d7',s:""},{m:'c6d5',s:""},
-          {q:'c5c4',p:"Enfermez le fou b3 !",s:"Le fou b3 est pris au piège : il n'a plus aucune case. Les Noirs vont le gagner.",h:['b3']}]},
-          {id:'lasker',mod:'Pièges',t:'Le piège de Lasker',
-          intro:`<p>Avec les Noirs, dans le contre-gambit Albin. Un piège spectaculaire qui se termine par une <b>sous-promotion</b> en cavalier !</p>`,
-          steps:[
-          {m:'d2d4',s:""},{m:'d7d5',s:""},{m:'c2c4',s:""},
-          {m:'e7e5',s:"Le contre-gambit Albin."},
-          {m:'d4e5',s:""},{m:'d5d4',s:"Le pion d4 gêne beaucoup les Blancs."},
-          {m:'e2e3',s:"Erreur : les Blancs attaquent le pion."},
-          {m:'f8b4',s:"Échec !"},{m:'c1d2',s:""},
-          {q:'d4e3',p:"Prenez le pion e3, sans craindre pour votre fou.",s:"Le pion menace de prendre en f2."},
-          {m:'d2b4',s:"Les Blancs prennent le fou."},
-          {m:'e3f2',s:"Échec !"},{m:'e1e2',s:""},
-          {q:'f2g1n',p:"Le coup génial : prenez en g1 et promouvez… en cavalier !",s:"Promotion en cavalier avec échec ! Si la tour reprend, le fou vient en g4 et gagne la dame blanche."}]}
-          );
-
-          const PUZZLES=[
-          {id:'p1',t:'Mat du couloir',th:'Mat en 1',fen:'6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1',sol:['d1d8'],x:'Td8# ! Le roi noir est enfermé par ses propres pions f7, g7 et h7. La tour contrôle toute la 8e rangée.'},
-          {id:'p2',t:'Le coup du berger',th:'Mat en 1',fen:'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4',sol:['h5f7'],x:'Dxf7# ! Le pion f7 n\'était défendu que par le roi, et la dame est protégée par le fou c4.'},
-          {id:'p3',t:'Les deux tours',th:'Mat en 1',fen:'7k/R7/8/8/8/8/8/1R4K1 w - - 0 1',sol:['b1b8'],x:'Tb8# ! La tour a7 interdit la 7e rangée, la tour b8 donne l\'échec sur la 8e : c\'est le mat de l\'escalier.'},
-          {id:'p4',t:'Mat à l\'étouffée',th:'Mat en 1',fen:'6rk/6pp/8/4N3/8/8/8/6K1 w - - 0 1',sol:['e5f7'],x:'Cf7# ! Le roi est entouré de ses propres pièces (Tg8, pions g7 et h7) : le cavalier mate seul.'},
-          {id:'p5',t:'La fourchette',th:'Gagner du matériel',fen:'r3k3/8/8/1N6/8/8/8/4K3 w - - 0 1',sol:['b5c7'],x:'Cc7+ ! Le cavalier attaque le roi et la tour a8. Le roi doit bouger, puis Cxa8 gagne la tour.'},
-          {id:'p6',t:'L\'enfilade',th:'Gagner la dame',fen:'7q/8/8/4k3/8/8/3B4/6K1 w - - 0 1',sol:['d2c3'],x:'Fc3+ ! Le fou met le roi en échec sur la grande diagonale. Le roi doit quitter la diagonale et Fxh8 gagne la dame.'},
-          {id:'p7',t:'Le clouage',th:'Gagner la dame',fen:'6k1/5qpp/8/8/8/1P6/6PP/5BK1 w - - 0 1',sol:['f1c4'],x:'Fc4 ! La dame f7 est clouée sur le roi g8. Si Dxc4, bxc4 : vous gagnez la dame contre un fou.'},
-          {id:'p8',t:'Attaque à la découverte',th:'Gagner la dame',fen:'4k3/8/8/8/q3N3/8/8/4R1K1 w - - 0 1',sol:['e4c5','e4c3'],x:'Le cavalier s\'écarte et démasque l\'échec de la tour e1, tout en attaquant la dame a4. Les Noirs doivent parer l\'échec et perdent la dame.'},
-          {id:'p9',t:'Double attaque de la dame',th:'Gagner une tour',fen:'r5k1/6pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',sol:['d1d5'],x:'Dd5+ ! Échec au roi g8 et attaque de la tour a8 en même temps. Après le coup de roi, Dxa8+.'},
-          {id:'p10',t:'La promotion',th:'Finale',fen:'8/P5k1/8/8/8/8/8/K7 w - - 0 1',sol:['a7a8q','a7a8r'],x:'a8=D ! Le roi noir est trop loin (règle du carré) : le pion devient dame et les Blancs gagnent.'}
-          ];
-
-          PUZZLES.push({id:'p11',t:'La fourchette de pion',th:'Gagner une pièce',fen:'6k1/8/2n1r3/8/3P4/8/8/6K1 w - - 0 1',sol:['d4d5'],x:'d5 ! Le pion attaque à la fois le cavalier c6 et la tour e6.'},{id:'p12',t:'Le double échec',th:'Gagner la dame',fen:'2q1k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1',sol:['e4d6'],x:'Cd6++ ! Double échec : seul le roi peut bouger, puis Cxc8.'},{id:'p13',t:'Mat sans pat',th:'Mat en 1',fen:'7k/8/5K2/8/8/8/8/6Q1 w - - 0 1',sol:['g1g7'],x:'Dg7# ! La dame est protégée par le roi. Attention : Dg6 aurait été pat.'});
-          /* ---------- Exercices : classement ---------- */
-          const PCAT={p1:'mat1',p2:'mat1',p3:'mat1',p4:'mat1',p13:'mat1',p5:'tac',p6:'tac',p7:'tac',p8:'tac',p9:'tac',p11:'tac',p12:'tac',p10:'fin'};
-          PUZZLES.push(
-          {id:'m1',cat:'mat1',t:'Le couloir (Noirs)',th:'Mat en 1',fen:'3r2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1',sol:['d8d1'],x:'Td1# ! Le roi blanc est enfermé derrière ses pions.'},
-          {id:'m2',cat:'mat1',t:'Dame et cavalier',th:'Mat en 1',fen:'5rk1/5pp1/8/6NQ/8/8/5PPP/6K1 w - - 0 1',sol:['h5h7'],x:'Dh7# ! La dame est protégée par le cavalier g5.'},
-          {id:'m3',cat:'mat1',t:'Le mat d’Anastasia',th:'Mat en 1',fen:'8/4N1pk/8/3R4/8/8/5PPP/6K1 w - - 0 1',sol:['d5h5'],x:'Th5# ! Le cavalier e7 contrôle g8 et g6, la tour ferme la colonne h.'},
-          {id:'m4',cat:'mat1',t:'Le mat de Boden',th:'Mat en 1',fen:'2kr4/p2n4/2p5/8/2B2B2/8/5PPP/6K1 w - - 0 1',sol:['c4a6'],x:'Fa6# ! Les deux fous se croisent : b8 et c7 par le fou f4, b7 par le fou a6.'},
-          {id:'m5',cat:'mat1',t:'Le mat arabe',th:'Mat en 1',fen:'7k/4R3/5N2/8/8/8/5PPP/6K1 w - - 0 1',sol:['e7h7'],x:'Th7# ! La tour est protégée par le cavalier, qui contrôle aussi g8.'},
-          {id:'n1',cat:'mat2',t:'Éliminer le défenseur',th:'Mat en 2',fen:'3r2k1/4qppp/8/8/8/8/3Q1PPP/3R2K1 w - - 0 1',line:['d2d8','e7d8','d1d8'],x:'Dxd8+ Dxd8 Txd8# : le sacrifice de dame détruit la défense de la dernière rangée.'},
-          {id:'n2',cat:'mat2',t:'Le mat de Philidor',th:'Mat en 2',fen:'5r1k/6pp/7N/8/2Q5/8/5PPP/6K1 w - - 0 1',line:['c4g8','f8g8','h6f7'],x:'Dg8+ Txg8 Cf7# : le mat à l’étouffée.'},
-          {id:'n3',cat:'mat2',t:'L’escalier',th:'Mat en 2',fen:'8/5k2/R7/1R6/8/8/8/7K w - - 0 1',line:['b5b7','f7f8','a6a8'],x:'Tb7+ puis Ta8# : les tours montent l’escalier.'},
-          {id:'n4',cat:'mat2',t:'La finale de Morphy',th:'Mat en 2',fen:'4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16',line:['b3b8','d7b8','d1d8'],x:'Db8+ ! Cxb8 Td8# : la célèbre fin de la partie de l’Opéra.'},
-          {id:'n5',cat:'mat2',t:'Le mat de Légal',th:'Mat en 2',fen:'rn1qkbnr/ppp2p1p/3p2p1/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6',line:['c4f7','e8e7','c3d5'],x:'Fxf7+ Re7 Cd5# : trois pièces mineures battent la dame.'},
-          {id:'f1',cat:'fin',t:'L’opposition',th:'Finale',fen:'4k3/8/4K3/4P3/8/8/8/8 w - - 0 1',sol:['e6d6','e6f6'],x:'Rd6 ou Rf6 ! Le roi se place à côté de son pion et garde le contrôle des cases devant lui.'},
-          {id:'f2',cat:'fin',t:'Construire le pont',th:'Finale de tours',fen:'1K6/1P2k3/8/8/8/8/2r5/3R4 w - - 0 1',sol:['d1d4'],x:'Td4 ! La tour servira de bouclier contre les échecs : c’est la position de Lucena.'},
-          {id:'f3',cat:'fin',t:'La course du pion',th:'Règle du carré',fen:'8/8/8/8/P7/8/5k2/K7 w - - 0 1',sol:['a4a5'],x:'a5 ! Le roi noir est hors du carré du pion : il ne le rattrapera jamais.'});
-          PUZZLES.forEach(p=>{if(!p.cat)p.cat=PCAT[p.id]||'tac';});
-          const MATECATS={mat1:1,mat2:1};
-          const CATS=[
-          {id:'mat',t:'Échec et mat',ic:'♚',d:'Mats types, mat en 1 et mat en 2',g:[
-           {t:'Les mats types',l:['couloir','etouffe','escalier','dameroi','legal']},{t:'Mat en 1',p:'mat1'},{t:'Mat en 2',p:'mat2'}]},
-          {id:'pieges',t:'Pièges dans les débuts',ic:'⚠',d:'Gagner vite, et ne jamais tomber dedans',g:[
-           {t:'Pièges avec les Blancs',l:['berger','legal','foiefrit','carokannpiege']},{t:'Pièges avec les Noirs',l:['sot','blackburne','elephant','englund','noe','lasker']}]},
-          {id:'debut',t:'Début',ic:'♟',d:'Les principes et les grandes ouvertures',g:[
-           {t:'Les principes',l:['valeurs','centre','dev','roque','dame','methode']},{t:'Ouvertures ouvertes (1.e4 e5)',l:['italienne','espagnole']},
-           {t:'Défenses contre 1.e4',l:['sicilienne','francaise','carokann','scandinave']},{t:'Ouvertures fermées (1.d4, 1.c4)',l:['gambitdame','londres','indienneroi','anglaise']}]},
-          {id:'milieu',t:'Milieu de jeu',ic:'♛',d:'Stratégies d’attaque, jeu positionnel, tactique',g:[
-           {t:'Stratégies d’attaque',l:['grec','roquesopp']},{t:'Stratégies positionnelles',l:['avantposte','colonnes','majorite','isole','minorite','fous','prophylaxie','plan']},
-           {t:'Les motifs tactiques',l:['fourchette','fourchettepion','clouage','enfilade','decouverte','doubleechec','eliminer','doubleattaque']},{t:'Exercices tactiques',p:'tac'},{t:'Partie célèbre',l:['morphy']}]},
-          {id:'finale',t:'Finale',ic:'♙',d:'Roi et pions, finales de tours',g:[
-           {t:'Finales de pions',l:['opposition','carre']},{t:'Finales de tours',l:['lucena','philidor']},{t:'Exercices de finale',p:'fin'}]}];
-          const LBY={};LESSONS.forEach(l=>LBY[l.id]=l);
-          function catLessons(c){return[...new Set(c.g.flatMap(g=>g.l||[]))];}
-          function catPuzzles(c){return c.g.filter(g=>g.p).flatMap(g=>PUZZLES.filter(p=>p.cat===g.p));}
-          const TIPS=['Avant chaque coup : échecs, prises, menaces.','Cavaliers avant les fous, et roquez tôt.','Une pièce mal placée ? Améliorez-la avant d’attaquer.','Avec de l’avance matérielle, échangez les pièces, pas les pions.','Les pions passés doivent avancer.','Placez les tours sur les colonnes ouvertes.','En finale, le roi est une pièce d’attaque : centralisez-le.','Demandez-vous toujours : que menace l’adversaire ?','Ne prenez pas un pion « gratuit » sans vérifier le piège.','Après votre coup, une pièce reste-t-elle sans défense ?','Ne bougez pas les pions f et g devant votre roi en début de partie.','Contre une dame en h5 tôt, pensez à g6 ou dame e7.'];
-
-          /* ---------- Navigation et tiroir ---------- */
-          const DRAWER=[
-           {h:'Entraînement'},
-           ...CATS.map(c=>({v:'cat',id:c.id,t:c.t,ic:c.ic})),
-           {v:'progres',t:'Progrès',ic:'↗'},{v:'erreurs',t:'Erreurs / Conseils',ic:'✎'},{v:'favoris',t:'Favoris',ic:'★'},
-           {h:'Défi'},
-           {v:'play',t:'Échiquier',ic:'▦'},{v:'defi',t:'Défi',ic:'⏱'},{v:'stats',t:'Statistiques',ic:'∿'},
-           {h:'Information'},{v:'info',t:'À propos et réglages',ic:'ℹ'}];
-          let route={v:'home'},stack=[],LP=null,DF=null;
-          function key(r){return r.v+(r.id||'');}
-          function openDrawer(o){document.body.classList.toggle('dopen',o);}
-          function renderDrawer(){$('dlist').innerHTML=txt(DRAWER.map(d=>d.h?'<div class="dh">'+d.h+'</div>':'<button class="di'+(key(route)===key(d)?' on':'')+'" data-v="'+d.v+'" data-id="'+(d.id||'')+'"><span class="dic">'+d.ic+'</span>'+d.t+'</button>').join(''));}
-          $('dlist').onclick=e=>{const b=e.target.closest('.di');if(!b)return;openDrawer(false);goRoot({v:b.dataset.v,id:b.dataset.id||undefined});};
-          $('scrim').onclick=()=>openDrawer(false);
-          $('dhome').onclick=()=>{openDrawer(false);goRoot({v:'home'});};
-          function goRoot(r){route=r;stack=[];show();}
-          function push(v){stack.push(v);show();}
-          function show(){stopSpeak();if(LP)LP.auto=false;LP=null;if(DF){clearInterval(DF.timer);DF=null;}
-           const v=stack.length?stack[stack.length-1]:route;$('bk').style.display=stack.length?'block':'none';$('mn').style.display=stack.length?'none':'block';
-           renderDrawer();BOARDS.length=0;window.scrollTo(0,0);
-           ({home:vHome,cat:vCat,lesson:vLesson,puzzle:vPuzzle,progres:vProgres,erreurs:vErreurs,gaffe:vGaffe,favoris:vFavoris,play:vPlay,defi:vDefi,stats:vStats,info:vInfo})[v.v](v);}
-          $('mn').onclick=()=>openDrawer(true);
-          $('bk').onclick=()=>window.handleBack();
-          window.handleBack=function(){if(document.body.classList.contains('dopen')){openDrawer(false);return true;}const p=$('promo');if(p){p.remove();return true;}
-           if(stack.length){stack.pop();show();return true;}if(route.v!=='home'){goRoot({v:'home'});return true;}return false;};
-          function title(t){$('ttl').textContent=t;}
-          function cnt(o){return Object.keys(o).filter(k=>o[k]).length;}
-          function favBtn(k){return '<button class="fav'+(ST.fav[k]?' on':'')+'" id="fv" data-k="'+k+'">'+(ST.fav[k]?'★':'☆')+'</button>';}
-          function bindFav(){const b=$('fv');if(b)b.onclick=()=>{const k=b.dataset.k;ST.fav[k]=!ST.fav[k];if(!ST.fav[k])delete ST.fav[k];save();b.classList.toggle('on',!!ST.fav[k]);b.textContent=ST.fav[k]?'★':'☆';};}
-          function audioBtn(){return '<button class="abtn" id="aud">'+(ST.audio?'🔊':'🔇')+'</button>';}
-          function bindAudio(){const b=$('aud');if(b)b.onclick=()=>{ST.audio=!ST.audio;save();b.textContent=ST.audio?'🔊':'🔇';if(!ST.audio)stopSpeak();};}
-          function lessonItem(id,k,list){const l=LBY[id];const d=ST.l[id];return '<div class="it" data-l="'+id+'" data-list="'+list.join(',')+'"><span class="ic '+(d?'done':'')+'">'+(d?'✓':k+1)+'</span><span class="itx"><b>'+l.t+'</b><small>'+l.steps.filter(x=>x.m||x.q).length+' coups · '+l.steps.filter(x=>x.q).length+' question(s)</small></span>'+(ST.fav['l:'+id]?'<span class="st">★</span>':'')+'</div>';}
-          function puzzleItem(p,k,list){const d=ST.p[p.id];return '<div class="it" data-p="'+p.id+'" data-list="'+list.join(',')+'"><span class="ic '+(d?'done':'')+'">'+(d?'✓':k+1)+'</span><span class="itx"><b>'+p.t+'</b><small>'+p.th+'</small></span>'+(ST.fav['p:'+p.id]?'<span class="st">★</span>':'')+'</div>';}
-          function bindItems(root){root.querySelectorAll('.it').forEach(e=>e.onclick=()=>{const list=(e.dataset.list||'').split(',').filter(Boolean);
-           if(e.dataset.l)push({v:'lesson',id:e.dataset.l,list});else if(e.dataset.p)push({v:'puzzle',id:e.dataset.p,list});else if(e.dataset.g!==undefined)push({v:'gaffe',i:+e.dataset.g});});}
-          function logo(){let sq='';for(let r=0;r<8;r++)for(let f=0;f<8;f++)if((r+f)%2)sq+='<rect x="'+(f*10)+'" y="'+(r*10)+'" width="10" height="10"/>';
-           return '<svg viewBox="-12 -30 104 112" class="logo"><defs><clipPath id="cc"><circle cx="40" cy="40" r="38"/></clipPath></defs><circle cx="40" cy="40" r="40" fill="#111"/><g clip-path="url(#cc)"><rect width="80" height="80" fill="#fff"/><g fill="#111">'+sq+'</g></g><text x="40" y="-2" text-anchor="middle" font-size="34" fill="#111">♚&#xFE0E;</text></svg>';}
-
-          /* ---------- Accueil ---------- */
-          function progressOf(c){const ls=catLessons(c),ps=catPuzzles(c);const d=ls.filter(i=>ST.l[i]).length+ps.filter(p=>ST.p[p.id]).length;return{d,n:ls.length+ps.length};}
-          function vHome(){title('Échecs Stratégie');
-           const nextL=LESSONS.find(l=>!ST.l[l.id]);const tip=TIPS[new Date().getDate()%TIPS.length];
-           $('main').innerHTML=txt(`<div class="hero">${logo()}<div><h2>Apprenez les échecs<br>coup par coup</h2><small>${LESSONS.length} leçons commentées · ${PUZZLES.length} exercices</small></div></div>
-           ${nextL?`<div class="card"><small class="mut">Continuer</small><h2>${nextL.t}</h2><button class="btn" id="hL" style="width:100%;margin-top:8px">▶ Reprendre l’apprentissage</button></div>`:''}
-           <div class="rows">${CATS.map(c=>{const p=progressOf(c);return `<div class="crow" data-c="${c.id}"><span class="cic">${c.ic}</span><span class="ctx"><b>${c.t}</b><small>${c.d}</small><span class="bar"><i style="width:${p.d/p.n*100}%"></i></span></span><span class="chev">›</span></div>`;}).join('')}</div>
-           <div class="row" style="margin-top:12px"><button class="btn sec" id="hD">⏱ Défi</button><button class="btn sec" id="hG">▦ Échiquier</button></div>
-           <div class="card tip" style="margin-top:12px"><h2>💡 Conseil du jour</h2>${tip}</div>`);
-           if($('hL'))$('hL').onclick=()=>{const c=CATS.find(c=>catLessons(c).includes(nextL.id));const g=c&&c.g.find(g=>g.l&&g.l.includes(nextL.id));push({v:'lesson',id:nextL.id,list:g?g.l:[nextL.id]});};
-           document.querySelectorAll('.crow').forEach(e=>e.onclick=()=>goRoot({v:'cat',id:e.dataset.c}));
-           $('hD').onclick=()=>goRoot({v:'defi'});$('hG').onclick=()=>goRoot({v:'play'});}
-
-          /* ---------- Catégorie (accordéon) ---------- */
-          const OPEN={};
-          function vCat(v){const c=CATS.find(x=>x.id===v.id);title(c.t);
-           if(OPEN[c.id]===undefined)OPEN[c.id]={0:true};
-           $('main').innerHTML=txt(`<div class="mut" style="margin:0 2px 10px">${c.d}</div>`+c.g.map((g,gi)=>{
-            const items=g.l?g.l.map((id,k)=>lessonItem(id,k,g.l)).join(''):PUZZLES.filter(p=>p.cat===g.p).map((p,k,a)=>puzzleItem(p,k,a.map(x=>x.id))).join('');
-            const n=g.l?g.l.length:PUZZLES.filter(p=>p.cat===g.p).length,d=g.l?g.l.filter(i=>ST.l[i]).length:PUZZLES.filter(p=>p.cat===g.p&&ST.p[p.id]).length;
-            return `<div class="acc${OPEN[c.id][gi]?' open':''}" data-gi="${gi}"><div class="ah"><span class="atx"><b>${g.t}</b><small>${g.p?'🧩 Exercices':'📖 Leçons'} · ${d} / ${n}</small></span><span class="achev">⌄</span></div><div class="ab">${items}</div></div>`;}).join(''));
-           document.querySelectorAll('.ah').forEach(h=>h.onclick=()=>{const a=h.parentNode,gi=a.dataset.gi;a.classList.toggle('open');OPEN[c.id][gi]=a.classList.contains('open');});
-           bindItems($('main'));}
-
-          /* ---------- Leçon coup par coup ---------- */
-          function buildLesson(l){let s=parseFEN(l.fen||START);for(const u of(l.pre||[]))s=make(s,legal(s).find(z=>uci(z)===u));
-           const st=[s],mv=[null],sn=[''],wd=[''];
-           l.steps.forEach(x=>{const p=st[st.length-1],u=x.m||x.q;if(!u){st.push(p);mv.push(null);sn.push('');wd.push('');return;}
-            const m=legal(p).find(z=>uci(z)===u);sn.push((p.t==='w'?p.n+'. ':p.n+'… ')+san(p,m));wd.push(moveWords(p,m));mv.push(m);st.push(make(p,m));});
-           return{st,mv,sn,wd};}
-          function qMatch(q,u){return q.length===5&&q[4]!=='q'?u===q:u.slice(0,4)===q.slice(0,4);}
-          function vLesson(v){const l=LBY[v.id],list=v.list&&v.list.length?v.list:[v.id],idx=list.indexOf(v.id);title(l.t);const D=buildLesson(l),N=l.steps.length;
-           const qs=l.steps.map((x,k)=>x.q?k:-1).filter(k=>k>=0);const flip=qs.length>0&&qs.every(k=>D.st[k].t==='b');
-           const P={k:0,solved:{},tries:0,fb:null,auto:false};LP=P;
-           $('main').innerHTML=`<div class="lhead"><div class="bar" style="flex:1;margin:0"><i id="lpb"></i></div><span class="mut" id="lpn"></span>${favBtn('l:'+l.id)}${audioBtn()}</div>
-           <div id="lb"></div>
-           <div class="ctl"><button id="c0">⏮</button><button id="c1">◀</button><button id="c2">⏯</button><button id="c3" class="nx">▶</button></div>
-           <div class="card lesson" id="lt"></div>`;
-           bindAudio();bindFav();
-           const B=Board($('lb'));B.flip=flip;
-           const cur=()=>P.k>0?l.steps[P.k-1]:null;
-           const quizOpen=()=>{const x=cur();return x&&x.q&&!P.solved[P.k];};
-           function render(doSpeak){const x=cur();let say='',html='';
-            if(P.k===0){B.arrows=l.a||[];B.hl=(l.h||[]).map(sqIdx);B.allow=null;B.onMove=null;B.set(D.st[0]);
-             html='<h2>'+l.t+'</h2>'+l.intro+'<div class="mut" style="margin-top:8px">👆 Touchez une pièce pour voir ses coups possibles. ▶ pour avancer, ⏯ pour la lecture automatique.</div>';say=l.t+'. '+l.intro;}
-            else if(quizOpen()){B.arrows=P.tries>=2?['y:'+x.q.slice(0,4)]:[];B.hl=[];B.allow=D.st[P.k-1].t;B.onMove=onMove;B.set(D.st[P.k-1],D.mv[P.k-1]);
-             html='<div class="quiz">🎯 <b>À vous de jouer</b> ('+(D.st[P.k-1].t==='w'?'Blancs':'Noirs')+')<br>'+x.p+'</div>'+(P.fb?'<div class="msg '+P.fb.c+'">'+P.fb.t+'</div>':'')+'<div class="row" style="margin-top:8px"><button class="btn sec sm" id="rv">💡 Voir la réponse</button></div>';say=x.p;}
-            else{B.arrows=x.a||[];B.hl=(x.h||[]).map(sqIdx);B.allow=null;B.onMove=null;B.set(D.st[P.k],D.mv[P.k]||null);
-             html=(D.sn[P.k]?'<div class="mvh">'+D.sn[P.k]+'</div>':'')+(P.fb&&x.q?'<div class="msg '+P.fb.c+'">'+P.fb.t+'</div>':'')+(x.s?'<p>'+x.s+'</p>':'');
-             say=(D.wd[P.k]||'')+' '+(P.fb&&x.q&&P.fb.c==='ok'?'Bravo ! ':'')+(x.s||'');
-             if(P.k===N){ST.l[l.id]=true;save();html+='<div class="msg ok">🏆 Leçon terminée !</div><div class="row">'+(list[idx+1]?'<button class="btn" id="nxl">Leçon suivante →</button>':'')+'<button class="btn sec" id="rpl">↺ Revoir</button></div>';}}
-            $('lt').innerHTML=txt(html);$('lpb').style.width=(P.k/N*100)+'%';$('lpn').textContent=P.k+' / '+N;$('c2').classList.toggle('on',P.auto);
-            if($('rv'))$('rv').onclick=()=>{P.solved[P.k]=true;P.fb={c:'info',t:'💡 La réponse était : <b>'+D.sn[P.k]+'</b>'};render(true);};
-            if($('nxl'))$('nxl').onclick=()=>{stack[stack.length-1]={v:'lesson',id:list[idx+1],list};show();};
-            if($('rpl'))$('rpl').onclick=()=>{P.k=0;P.solved={};P.fb=null;render(true);};
-            if(doSpeak)speak(say,()=>{if(LP===P&&P.auto){if(P.k<N&&!quizOpen())setTimeout(()=>{if(LP===P&&P.auto&&!quizOpen())step(1);},650);else{P.auto=false;$('c2').classList.remove('on');}}});}
-           function step(d){if(d>0&&quizOpen()){P.solved[P.k]=true;P.fb={c:'info',t:'💡 La réponse était : <b>'+D.sn[P.k]+'</b>'};render(true);return;}
-            const k=Math.max(0,Math.min(N,P.k+d));if(k===P.k&&d!==0)return;P.k=k;P.tries=0;P.fb=null;render(true);}
-           function onMove(m){const x=cur();if(!quizOpen())return;const u=uci(m);
-            if(qMatch(x.q,u)){P.solved[P.k]=true;P.fb={c:'ok',t:'✅ Bravo !'};render(true);}
-            else if(x.ok&&x.ok.includes(u)){P.solved[P.k]=true;P.fb={c:'ok',t:'✅ Bonne idée aussi ! Voyons la suite principale.'};render(true);}
-            else{P.tries++;B.allow=null;B.set(make(D.st[P.k-1],m),m);P.fb={c:'no',t:'❌ Ce n’est pas le coup attendu. Réessayez !'+(P.tries>=2?' Suivez la flèche jaune.':'')};
-             speak('Ce n’est pas le coup attendu. Réessayez.');setTimeout(()=>{if(LP===P)render(false);},1000);}}
-           $('c0').onclick=()=>{P.auto=false;P.k=0;P.fb=null;render(true);};
-           $('c1').onclick=()=>{P.auto=false;step(-1);};
-           $('c3').onclick=()=>{P.auto=false;step(1);};
-           $('c2').onclick=()=>{P.auto=!P.auto;if(P.auto){if(P.k>=N){P.k=0;P.solved={};}if(quizOpen()){P.auto=false;speak(cur().p);}else if(P.k===0)render(true);else step(1);}else stopSpeak();$('c2').classList.toggle('on',P.auto);};
-           render(true);}
-
-          /* ---------- Exercice (moteur commun) ---------- */
-          function PuzzleRun(B,P,cb){const line=P.line||null;let s=parseFEN(P.fen),i=0;const me=s.t;
-           B.flip=me==='b';B.allow=me;B.arrows=[];B.hl=[];B.set(s);
-           const last=()=>line?i===line.length-1:true;
-           B.onMove=m=>{const u=uci(m),n=make(s,m);
-            const ok=line?(u.slice(0,4)===line[i].slice(0,4)||(last()&&MATECATS[P.cat]&&status(n)==='mate')):(P.sol.includes(u)||(MATECATS[P.cat]&&status(n)==='mate'));
-            B.arrows=[];
-            if(!ok){B.allow=null;B.set(n,m);cb.wrong&&cb.wrong(m);return;}
-            const prev=s;s=n;B.set(s,m);i++;
-            if(!line||i>=line.length){B.allow=null;cb.done&&cb.done(prev,m);return;}
-            B.allow=null;cb.step&&cb.step();
-            setTimeout(()=>{const r=legal(s).find(z=>uci(z)===line[i])||legal(s)[0];s=make(s,r);B.set(s,r);i++;B.allow=me;},600);};
-           return{retry(){B.allow=me;B.set(s,null);},hint(){const u=line?line[i]:P.sol[0];B.arrows=['y:'+u.slice(0,4)];B.render();},
-            reset(){s=parseFEN(P.fen);i=0;B.allow=me;B.arrows=[];B.set(s);}};}
-          function vPuzzle(v){const list=v.list&&v.list.length?v.list:[v.id],k=list.indexOf(v.id),P=PUZZLES.find(p=>p.id===v.id);title(P.t);const s0=parseFEN(P.fen);
-           $('main').innerHTML=`<div class="status"><span style="flex:1">${s0.t==='w'?'⚪ Les Blancs jouent':'⚫ Les Noirs jouent'} · ${P.th}</span>${favBtn('p:'+P.id)}</div>
-           <div id="pb"></div><div id="pm"><div class="mut" style="margin-top:8px">👆 Touchez une pièce pour voir ses coups possibles.</div></div>
-           <div class="row" style="margin-top:12px"><button class="btn sec" id="rs">↺</button><button class="btn sec" id="so">💡 Solution</button>${list[k+1]?'<button class="btn" id="nx">Suivant →</button>':''}</div>`;
-           bindFav();let tried=false;const B=Board($('pb'));
-           const R=PuzzleRun(B,P,{
-            done:(prev,m)=>{if(!ST.p[P.id]){ST.stats.pa++;if(!tried)ST.stats.ps++;}ST.p[P.id]=true;delete ST.pfail[P.id];save();$('pm').innerHTML='<div class="msg ok">✅ <b>Bravo !</b> '+P.x+'</div>';speak('Bravo ! '+moveWords(prev,m));},
-            step:()=>{$('pm').innerHTML='<div class="msg info">👍 Bien ! Continuez…</div>';},
-            wrong:()=>{if(!tried&&!ST.p[P.id]){ST.stats.pf++;ST.pfail[P.id]=true;save();}tried=true;$('pm').innerHTML='<div class="msg no">❌ Ce n\'est pas le meilleur coup. Réessayez !</div>';speak('Ce n’est pas le meilleur coup. Réessayez.');setTimeout(()=>R.retry(),900);}});
-           $('rs').onclick=()=>{R.reset();$('pm').innerHTML='';};
-           $('so').onclick=()=>{tried=true;R.hint();$('pm').innerHTML='<div class="msg info">💡 '+P.x+'</div>';};
-           if($('nx'))$('nx').onclick=()=>{stack[stack.length-1]={v:'puzzle',id:list[k+1],list};show();};}
-
-          /* ---------- Défi chronométré ---------- */
-          function vDefi(){title('⏱ Défi');
-           $('main').innerHTML=txt(`<div class="card"><h2>Défi 3 minutes</h2><p>Résolvez un maximum d’exercices en 3 minutes. Une erreur fait passer à l’exercice suivant.</p>
-           <div class="kpis"><div><b>${ST.stats.db}</b><small>Meilleur score</small></div><div><b>${ST.stats.dn}</b><small>Défis joués</small></div></div>
-           <button class="btn" id="go" style="width:100%;margin-top:12px">▶ Commencer le défi</button></div>`);
-           $('go').onclick=startDefi;}
-          function startDefi(){const pool=PUZZLES.slice().sort(()=>Math.random()-.5);DF={t:180,score:0,err:0,i:0,pool,timer:null};
-           $('main').innerHTML='<div class="dbar"><span id="dt">3:00</span><span>✅ <b id="ds">0</b></span><span>❌ <b id="de">0</b></span></div><div id="db"></div><div id="dm"></div><button class="btn sec" id="dq" style="width:100%;margin-top:10px">Arrêter</button>';
-           const B=Board($('db'));const D=DF;
-           function next(){if(DF!==D)return;const P=D.pool[D.i++%D.pool.length];$('dm').innerHTML=txt('<div class="msg info">'+P.th+' · '+P.t+' — '+(parseFEN(P.fen).t==='w'?'les Blancs jouent':'les Noirs jouent')+'</div>');
-            PuzzleRun(B,P,{done:()=>{D.score++;$('ds').textContent=D.score;setTimeout(next,500);},wrong:()=>{D.err++;$('de').textContent=D.err;setTimeout(next,700);}});}
-           D.timer=setInterval(()=>{D.t--;$('dt').textContent=Math.floor(D.t/60)+':'+String(D.t%60).padStart(2,'0');if(D.t<=0)endDefi();},1000);
-           $('dq').onclick=endDefi;next();}
-          function endDefi(){const D=DF;if(!D)return;clearInterval(D.timer);DF=null;ST.stats.dn++;const rec=D.score>ST.stats.db;if(rec)ST.stats.db=D.score;save();
-           $('main').innerHTML=txt(`<div class="card" style="text-align:center"><h2>Défi terminé !</h2><div class="big">${D.score}</div><div class="mut">exercices réussis · ${D.err} erreur(s)</div>${rec?'<div class="msg ok">🏆 Nouveau record !</div>':''}<button class="btn" id="go" style="width:100%;margin-top:12px">↺ Rejouer</button></div>`);
-           speak('Défi terminé. Score : '+D.score+(rec?'. Nouveau record !':''));$('go').onclick=startDefi;}
-
-          /* ---------- Progrès ---------- */
-          function level(p){return p<.15?'Débutant':p<.4?'Apprenti':p<.7?'Intermédiaire':p<.95?'Avancé':'Expert';}
-          function vProgres(){title('↗ Progrès');let D=0,Nn=0;const rows=CATS.map(c=>{const p=progressOf(c);D+=p.d;Nn+=p.n;const ls=catLessons(c),ps=catPuzzles(c);
-            return `<div class="card"><h2>${c.ic} ${c.t}</h2><div class="bar"><i style="width:${p.d/p.n*100}%"></i></div><div class="mut">📖 ${ls.filter(i=>ST.l[i]).length} / ${ls.length} leçons${ps.length?' · 🧩 '+ps.filter(x=>ST.p[x.id]).length+' / '+ps.length+' exercices':''}</div></div>`;}).join('');
-           const r=Nn?D/Nn:0;
-           $('main').innerHTML=txt(`<div class="card" style="text-align:center"><div class="big">${Math.round(r*100)} %</div><div class="mut">de l’entraînement terminé</div><div class="lvl">Niveau : <b>${level(r)}</b></div></div>`+rows);}
-
-          /* ---------- Erreurs / Conseils ---------- */
-          function vErreurs(){title('✎ Erreurs / Conseils');const pf=PUZZLES.filter(p=>ST.pfail[p.id]&&!ST.p[p.id]);
-           $('main').innerHTML=txt(`<div class="sh">🧩 Exercices à revoir</div>${pf.length?pf.map((p,k)=>puzzleItem(p,k,pf.map(x=>x.id))).join(''):'<div class="mut pad">Aucun exercice raté pour l’instant.</div>'}
-           <div class="sh">♟ Vos gaffes en partie</div>${ST.err.length?ST.err.map((e,i)=>'<div class="it" data-g="'+i+'"><span class="ic '+(e.ok?'done':'')+'">'+(e.ok?'✓':'!')+'</span><span class="itx"><b>Vous avez joué '+e.pl+'</b><small>Retrouvez le meilleur coup</small></span></div>').join(''):'<div class="mut pad">L’entraîneur notera ici vos gaffes contre l’ordinateur.</div>'}
-           <div class="sh">💡 Conseils</div><div class="card">${TIPS.map(t=>'<p>• '+t+'</p>').join('')}</div>`);
-           bindItems($('main'));}
-          function vGaffe(v){const e=ST.err[v.i];if(!e){stack.pop();show();return;}title('Votre gaffe');const s=parseFEN(e.fen);
-           $('main').innerHTML=`<div class="status">${s.t==='w'?'⚪ Les Blancs jouent':'⚫ Les Noirs jouent'}</div><div id="gbb"></div><div id="gm"><div class="msg info">Dans la partie, vous avez joué <b>${e.pl}</b>. Trouvez mieux !</div></div><div class="row" style="margin-top:10px"><button class="btn sec" id="gs">💡 Solution</button></div>`;
-           const B=Board($('gbb'));B.flip=s.t==='b';B.allow=s.t;B.set(s);
-           B.onMove=m=>{let sc;try{sc=rootScores(s,2);}catch(x){return;}const best=Math.max(...sc.map(z=>z.v));const me=sc.find(z=>uci(z.m)===uci(m));B.set(make(s,m),m);
-            if(me&&me.v>=best-40){e.ok=1;save();B.allow=null;$('gm').innerHTML='<div class="msg ok">✅ Bravo ! '+(uci(m)===e.b?'C’est le meilleur coup.':'Très bon coup aussi. Le meilleur était '+e.bs+'.')+'</div>';speak('Bravo !');}
-            else{B.allow=null;$('gm').innerHTML='<div class="msg no">❌ Pas encore. Réessayez !</div>';setTimeout(()=>{B.allow=s.t;B.set(s);},900);}};
-           $('gs').onclick=()=>{B.arrows=['y:'+e.b.slice(0,4)];B.render();$('gm').innerHTML='<div class="msg info">💡 Le meilleur coup était <b>'+e.bs+'</b>.</div>';};}
-
-          /* ---------- Favoris ---------- */
-          function vFavoris(){title('★ Favoris');const ls=Object.keys(ST.fav).filter(k=>k.startsWith('l:')).map(k=>k.slice(2)).filter(id=>LBY[id]);
-           const ps=Object.keys(ST.fav).filter(k=>k.startsWith('p:')).map(k=>PUZZLES.find(p=>p.id===k.slice(2))).filter(Boolean);
-           $('main').innerHTML=txt((ls.length||ps.length)?(ls.length?'<div class="sh">📖 Leçons</div>'+ls.map((id,k)=>lessonItem(id,k,ls)).join(''):'')+(ps.length?'<div class="sh">🧩 Exercices</div>'+ps.map((p,k)=>puzzleItem(p,k,ps.map(x=>x.id))).join(''):'')
-            :'<div class="card"><h2>Aucun favori</h2><p>Touchez l’étoile ☆ en haut d’une leçon ou d’un exercice pour le retrouver ici.</p></div>');
-           bindItems($('main'));}
-
-          /* ---------- Statistiques ---------- */
-          function vStats(){title('∿ Statistiques');const s=ST.stats,g=s.gw+s.gl+s.gd,pt=s.ps+s.pf;
-           $('main').innerHTML=txt(`<div class="sh">🧩 Exercices</div><div class="kpis"><div><b>${cnt(ST.p)}</b><small>Résolus</small></div><div><b>${pt?Math.round(s.ps/pt*100)+' %':'–'}</b><small>Réussis du 1er coup</small></div><div><b>${Object.keys(ST.pfail).filter(id=>!ST.p[id]).length}</b><small>À revoir</small></div></div>
-           <div class="sh">📖 Leçons</div><div class="kpis"><div><b>${cnt(ST.l)}</b><small>Terminées</small></div><div><b>${LESSONS.length}</b><small>Au total</small></div><div><b>${cnt(ST.fav)}</b><small>Favoris</small></div></div>
-           <div class="sh">♟ Parties contre l’ordinateur</div><div class="kpis"><div><b>${s.gw}</b><small>Victoires</small></div><div><b>${s.gd}</b><small>Nulles</small></div><div><b>${s.gl}</b><small>Défaites</small></div></div>
-           ${g?'<div class="card"><div class="wdl"><i style="flex:'+s.gw+';background:var(--ok)"></i><i style="flex:'+s.gd+';background:#9a8a77"></i><i style="flex:'+s.gl+';background:var(--bad)"></i></div></div>':''}
-           <div class="sh">⏱ Défi</div><div class="kpis"><div><b>${s.db}</b><small>Meilleur score</small></div><div><b>${s.dn}</b><small>Défis joués</small></div><div><b>${ST.err.length}</b><small>Gaffes notées</small></div></div>`);}
-
-          /* ---------- Information ---------- */
-          function vInfo(){title('ℹ Information');const noVoice=window.AndroidTTS&&!ttsReady();
-           $('main').innerHTML=txt(`<div class="card"><h2>🔊 Voix française</h2><div class="mut">${noVoice?'La voix française n’est pas encore prête sur ce téléphone.':'Les leçons, les exercices et l’entraîneur parlent en français.'}</div>
-           <div class="row" style="margin-top:10px"><button class="btn sec" id="iA">${ST.audio?'🔊 Activée':'🔇 Désactivée'}</button><button class="btn sec" id="iT">Tester</button>${window.AndroidTTS?'<button class="btn sec" id="iI">Installer la voix</button>':''}</div></div>
-           <div class="card"><h2>Comment utiliser l’application</h2><p>• <b>Leçons</b> : avancez avec ▶, ou lancez la lecture automatique avec ⏯. Les flèches vertes montrent les idées, les rouges les menaces, les bleues les plans.</p><p>• <b>À vous de jouer</b> : trouvez le coup demandé. Après deux erreurs, une flèche jaune vous aide.</p><p>• Touchez n’importe quelle pièce pour voir ses <b>coups possibles</b>.</p><p>• <b>Échiquier</b> : jouez contre l’ordinateur, l’entraîneur note vos gaffes dans « Erreurs / Conseils ».</p></div>
-           <div class="card"><h2>Réinitialiser</h2><p class="mut">Efface toute votre progression, vos statistiques et vos favoris.</p><button class="btn sec" id="iR">Tout effacer</button></div>
-           <div class="mut" style="text-align:center;margin:16px 0">Échecs Stratégie · version 3.0</div>`);
-           $('iA').onclick=()=>{ST.audio=!ST.audio;save();if(!ST.audio)stopSpeak();vInfo();};
-           $('iT').onclick=()=>{if(!ST.audio){ST.audio=true;save();vInfo();}speak('Bonjour ! Je vais commenter chaque coup de vos leçons d’échecs.');};
-           if($('iI'))$('iI').onclick=()=>{try{AndroidTTS.install();}catch(e){}};
-           $('iR').onclick=()=>{const b=$('iR');if(b.dataset.c){ST.l={};ST.p={};ST.pfail={};ST.fav={};ST.err=[];ST.game=null;ST.stats={pa:0,ps:0,pf:0,gw:0,gl:0,gd:0,db:0,dn:0};save();G.hist=[];goRoot({v:'home'});}else{b.dataset.c=1;b.textContent='Confirmer : tout effacer';}};}
-
-          /* ---------- Jouer ---------- */
-          const LEVELS=[{n:'Débutant',depth:1,time:400,noise:250},{n:'Facile',depth:2,time:800,noise:60},{n:'Moyen',depth:3,time:1500,noise:15},{n:'Fort',depth:5,time:3000,noise:0}];
-          const G={hist:[],moves:[],sans:[],last:null,msg:null,thinking:false,over:null,hint:[]};
-          function loadGame(){G.hist=[parseFEN(START)];G.moves=[];G.sans=[];G.last=null;G.msg=null;G.over=null;G.hint=[];
-           if(ST.game&&ST.game.moves){for(const u of ST.game.moves){const s=cur();const m=legal(s).find(z=>uci(z)===u);if(!m)break;pushMove(m,true);}}
-           G.over=status(cur());}
-          function cur(){return G.hist[G.hist.length-1];}
-          function pushMove(m,quiet){const s=cur();G.sans.push(san(s,m));G.hist.push(make(s,m));G.moves.push(uci(m));G.last=m;G.hint=[];if(!quiet){ST.game={moves:G.moves.slice(),rec:ST.game&&ST.game.rec&&G.over?1:0};save();}}
-          const SET=ST.set;
-          function aiTurn(){return SET.mode==='ai'&&!G.over&&cur().t!==SET.color;}
-          let PB=null;
-          function vPlay(){title('▦ Échiquier');
-           if(!G.hist.length)loadGame();
-           if(!ST.game){vSetup();return;}
-           $('main').innerHTML=`<div class="status" id="st"></div><div id="gb"></div><div id="cm"></div><div class="moves" id="mv"></div>
-           <div class="row"><button class="btn sec sm" id="un">↶ Annuler</button><button class="btn sec sm" id="hi">💡 Indice</button><button class="btn sec sm" id="fl">⇅ Tourner</button><button class="btn sm" id="ng">Nouvelle</button></div>`;
-           PB=Board($('gb'));PB.flip=SET.mode==='ai'&&SET.color==='b';
-           PB.onMove=m=>{const prev=cur();pushMove(m);G.msg=null;updPlay();G.over=status(cur());
-            setTimeout(()=>{if(SET.coach&&SET.mode==='ai'){coach(prev,m);coachSay();}G.over=status(cur());updPlay();if(aiTurn())aiMove();},30);};
-           $('un').onclick=()=>{if(G.thinking||G.moves.length===0)return;let k=SET.mode==='ai'?(cur().t===SET.color?2:1):1;k=Math.min(k,G.moves.length);
-            const ms=G.moves.slice(0,G.moves.length-k);ST.game={moves:ms};save();loadGame();updPlay();if(aiTurn())aiMove();};
-           $('hi').onclick=()=>{if(G.thinking||G.over||aiTurn())return;G.thinking=true;updPlay();setTimeout(()=>{const m=think(cur(),{depth:4,time:1500,noise:0});G.thinking=false;if(m){G.hint=[m.f,m.t];G.msg={c:'warn',t:'💡 Indice : essayez <b>'+san(cur(),m)+'</b>.'};speak('Indice : '+moveWords(cur(),m));}updPlay();},40);};
-           $('fl').onclick=()=>{PB.flip=!PB.flip;PB.render();};
-           $('ng').onclick=()=>{if(G.thinking)return;ST.game=null;save();vSetup();};
-           updPlay();if(aiTurn()&&!G.thinking)aiMove();}
-          function recResult(){if(!G.over||SET.mode!=='ai'||!ST.game||ST.game.rec)return;ST.game.rec=1;const s=cur();if(G.over==='mate'){if(s.t!==SET.color)ST.stats.gw++;else ST.stats.gl++;}else ST.stats.gd++;save();}
-          function updPlay(){if(!PB||!document.body.contains(PB.el))return;const s=cur();recResult();
-           PB.allow=(G.over||G.thinking)?null:(SET.mode==='ai'?SET.color:'both');PB.arrows=G.hint.length?['y:'+sqName(G.hint[0])+sqName(G.hint[1])]:[];PB.set(s,G.last);
-           let st;if(G.over){st={mate:(s.t==='w'?'Les Noirs':'Les Blancs')+' gagnent par échec et mat ! 🏆',pat:'Pat : partie nulle.','50':'Nulle (règle des 50 coups).',mat:'Nulle : matériel insuffisant.'}[G.over];
-            if(G.over==='mate'&&SET.mode==='ai')st=(s.t!==SET.color?'🏆 Victoire ! Échec et mat.':'Échec et mat… L\'ordinateur gagne. Rejouez !');}
-           else if(G.thinking)st='<div class="spin"></div>'+(aiTurn()?'L\'ordinateur réfléchit…':'Analyse…');
-           else st=(s.t==='w'?'⚪ Trait aux Blancs':'⚫ Trait aux Noirs')+(inCheck(s)?' — <span style="color:var(--bad)">Échec !</span>':'')+(SET.mode==='ai'?' · '+LEVELS[SET.level].n:'');
-           $('st').innerHTML=st;
-           $('cm').innerHTML=G.msg?'<div class="coach '+G.msg.c+'">'+G.msg.t+'</div>':'';
-           let mv='';for(let i=0;i<G.sans.length;i++){if(i%2===0)mv+='<b>'+(i/2+1)+'.</b> ';mv+=G.sans[i]+' ';}
-           $('mv').innerHTML=mv||'<span class="mut">Les coups joués apparaîtront ici.</span>';$('mv').scrollTop=9999;}
-          function coachSay(){if(G.msg&&(G.msg.c==='bad'||G.msg.c==='warn'))speak(G.msg.t.replace(/<b>(.*?)<\/b>/,'$1'));}
-          function aiMove(){G.thinking=true;updPlay();setTimeout(()=>{const m=think(cur(),LEVELS[SET.level]);G.thinking=false;if(m)pushMove(m);G.over=status(cur());updPlay();},60);}
-          function coach(prev,m){const ms=legal(prev);if(ms.length<2)return;
-           let sc;try{sc=rootScores(prev,2);}catch(e){return;}
-           const cl=v=>Math.max(-3000,Math.min(3000,v));const best=sc.reduce((a,b)=>b.v>a.v?b:a);const me=sc.find(z=>uci(z.m)===uci(m));if(!me)return;
-           const d=cl(best.v)-cl(me.v);const bs=san(prev,best.m,ms);
-           if(uci(best.m)===uci(m)||d<=15)G.msg={c:'good',t:'✅ Bon coup ! C\'est ce que l\'entraîneur aurait joué.'};
-           else if(d<80)G.msg={c:'good',t:'👍 Coup correct. '+bs+' était légèrement meilleur.'};
-           else if(d<220)G.msg={c:'warn',t:'⚠️ Imprécision. Le meilleur coup était <b>'+bs+'</b>.'};
-           else{G.msg={c:'bad',t:'❌ Gaffe ! Vous perdez du matériel ou de la position. Il fallait jouer <b>'+bs+'</b>. Pensez : échecs, prises, menaces.'};ST.err.unshift({fen:toFEN(prev),pl:san(prev,m,ms),b:uci(best.m),bs:bs});ST.err=ST.err.slice(0,30);save();}}
-          function vSetup(){title('▦ Nouvelle partie');
-           const seg=(id,opts,val)=>'<div class="seg" id="'+id+'">'+opts.map(o=>'<button data-v="'+o[0]+'" class="'+(String(o[0])===String(val)?'on':'')+'">'+o[1]+'</button>').join('')+'</div>';
-           $('main').innerHTML=txt(`<div class="card"><h2>Adversaire</h2>${seg('sm',[['ai','Ordinateur'],['2p','2 joueurs']],SET.mode)}
-           <div id="aiopt"><h2>Votre couleur</h2>${seg('sc',[['w','⚪ Blancs'],['b','⚫ Noirs'],['r','🎲 Hasard']],SET.color)}
-           <h2>Niveau</h2>${seg('sl',LEVELS.map((l,i)=>[i,l.n]),SET.level)}
-           <h2>Entraîneur</h2>${seg('sk',[['1','Activé'],['0','Désactivé']],SET.coach?'1':'0')}<div class="mut">L'entraîneur analyse chacun de vos coups et vous signale les gaffes.</div></div></div>
-           <button class="btn" style="width:100%" id="go">Commencer la partie</button>`);
-           let col=SET.color;
-           const bind=(id,fn)=>$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fn(b.dataset.v);};
-           bind('sm',v=>{SET.mode=v;$('aiopt').style.display=v==='ai'?'block':'none';});bind('sc',v=>col=v);bind('sl',v=>SET.level=+v);bind('sk',v=>SET.coach=v==='1');
-           $('aiopt').style.display=SET.mode==='ai'?'block':'none';
-           $('go').onclick=()=>{SET.color=col==='r'?(Math.random()<.5?'w':'b'):col;ST.game={moves:[]};save();G.hist=[];vPlay();};}
-
-
-          $('dhome').innerHTML=logo();
-          show();
-          </script>
-          </body>
-          </html>
-          EOF_10
+          base64 -d > index.html.gz << 'EOF_HTML'
+          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
+          GZU+Kefc3nv/B26sPx3hrQEA
+          EOF_HTML
+          gunzip -c index.html.gz > app/src/main/assets/index.html
+          rm index.html.gz
+          ls -la app/src/main/assets
 
 
       - name: Construire l'APK
@@ -1438,7 +900,7 @@ jobs:
         run: cp app/build/outputs/apk/debug/app-debug.apk EchecsStrategie.apk
 
       - name: Télécharger l'APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: EchecsStrategie-APK
           path: EchecsStrategie.apk
